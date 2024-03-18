@@ -8,33 +8,32 @@ class NoteRepository {
   static const _dbName = 'hris.db';
   static const _tblemployees = 'tblemployees';
   static const _event = 'events';
-  // static const _tableName = 'tblemployees';
 
   static Future<Database> _database() async {
     final dbPath = await getDatabasesPath();
     final database =
         openDatabase(join(dbPath, _dbName), onCreate: (db, version) {
-      // Create the first table
+      // Create the employees table
       db.execute(
-          'CREATE TABLE tblemployees(Employeeid varchar(255) PRIMARY KEY, FirstName TEXT, LastName TEXT, Department TEXT, Fingerid TEXT)');
+          'CREATE TABLE $_tblemployees(Employeeid TEXT PRIMARY KEY, FirstName TEXT, LastName TEXT, Department TEXT, Fingerid TEXT)');
 
-      // Create the second table
+      // Create the events table
       db.execute('''
-          CREATE TABLE events (
-            event_id varchar(255) DEFAULT NULL,
-            event_name varchar(255) DEFAULT NULL
+          CREATE TABLE $_event (
+            event_id TEXT PRIMARY KEY,
+            event_name TEXT
           )
           ''');
 
-      // Create the third table
+      // Create the scan_logs table if needed
       db.execute('''
-          CREATE TABLE scan_logs (
-            logs_id varchar(255) DEFAULT NULL,
-            event_id varchar(255) DEFAULT NULL,
-            Employeeid varchar(255) DEFAULT NULL,
-            logs_date varchar(255) DEFAULT NULL,
-            logs_time text DEFAULT NULL,
-            timestamp varchar(255) DEFAULT NULL
+          CREATE TABLE IF NOT EXISTS scan_logs (
+            logs_id TEXT PRIMARY KEY,
+            event_id TEXT,
+            Employeeid TEXT,
+            logs_date TEXT,
+            logs_time TEXT,
+            timestamp TEXT
           )
           ''');
     }, version: 1);
@@ -46,16 +45,23 @@ class NoteRepository {
     await db.delete(_tblemployees); // Delete all rows from the employees table
   }
 
+  static Future<List<Map<String, dynamic>>> callAllEvents() async {
+    final db = await _database();
+    var res = await db.rawQuery(
+        "SELECT * FROM events"); // Select all rows from the events table
+    return res;
+  }
+
   static Future<void> deleteActiveEvent() async {
     final db = await _database();
-    await db.delete(_event); // Delete all rows from the employees table
+    await db.delete(_event); // Delete all rows from the events table
   }
 
   static Future<int> getEmployeeCount() async {
     try {
       final db = await _database();
       final count = Sqflite.firstIntValue(
-          await db.rawQuery('SELECT COUNT(*) FROM tblemployees'));
+          await db.rawQuery('SELECT COUNT(*) FROM $_tblemployees'));
       return count ?? 0;
     } catch (e) {
       print('Error getting employee count: $e');
@@ -114,13 +120,12 @@ class NoteRepository {
     await db.rawInsert(query);
   }
 
-  static Future<void> insertToEvents(
-      List<Map<String, dynamic>> activeEvent) async {
+  static Future<void> insertToEvents(List<Map<String, dynamic>> events) async {
     final db = await _database();
 
     // Generate the values section of the SQL query
-    List<String> valueStrings = activeEvent.map((activeEvent) {
-      return "('${activeEvent['event_id']}', '${activeEvent['event_name']}')";
+    List<String> valueStrings = events.map((event) {
+      return "('${event['event_id']}', '${event['event_name']}')";
     }).toList();
 
     // Generate the full SQL INSERT query
@@ -130,21 +135,11 @@ class NoteRepository {
     await db.rawInsert(query);
   }
 
-  // New method to call all employees from tbl_profile
   static Future<List<Map<String, dynamic>>> callAllEmployees() async {
     final db = await _database();
-    var res = await db.rawQuery("SELECT * FROM tblemployees");
+    var res = await db.rawQuery("SELECT * FROM $_tblemployees");
     return res;
   }
-
-  // static insert({required Note note}) async {
-  //   final db = await _database();
-  //   await db.insert(
-  //     _tblemployees,
-  //     note.toMap(),
-  //     conflictAlgorithm: ConflictAlgorithm.replace,
-  //   );
-  // }
 
   static Future<List<Employee>> getEmployees() async {
     final db = await _database();

@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:diary_app/repository/notes_repository.dart';
+import '../../repository/notes_repository.dart';
 import 'package:diary_app/models/employee.dart';
+import 'package:diary_app/models/events.dart'; // Import the Event model
 import '../../layouts/bottom_nav_bar.dart'; // Import the BottomNavBar widget
 
 class EmployeesScreen extends StatefulWidget {
@@ -17,21 +18,35 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
 
   Future<void> fetchDataAndSync() async {
     try {
-      final response = await http
+      final employeeResponse = await http
           .get(Uri.parse('http://192.168.1.21:81/hris/fetchEmployees'));
-      if (response.statusCode == 200) {
+      final eventResponse = await http
+          .get(Uri.parse('http://192.168.1.21:81/hris/fetchEventActive'));
+
+      if (employeeResponse.statusCode == 200 &&
+          eventResponse.statusCode == 200) {
         List<Employee> employees =
-            (json.decode(response.body)['employees'] as List)
+            (json.decode(employeeResponse.body)['employees'] as List)
                 .map((data) => Employee.fromJson(data))
                 .toList();
 
-        // Delete existing data from tblemployees in SQLite
-        await NoteRepository.deleteAllEmployees();
+        List<ActiveEvent> events =
+            (json.decode(eventResponse.body)['event'] as List)
+                .map((data) => ActiveEvent.fromJson(data))
+                .toList();
 
-        // Insert new data into tblemployees in SQLite
+        // Delete existing data from tables in SQLite
+        await NoteRepository.deleteAllEmployees();
+        await NoteRepository.deleteActiveEvent();
+
+        // Insert new data into tables in SQLite
         List<Map<String, dynamic>> employeeData =
             employees.map((employee) => employee.toJson()).toList();
+        List<Map<String, dynamic>> eventData =
+            events.map((event) => event.toJson()).toList();
+
         await NoteRepository.insertToEmployees(employeeData);
+        await NoteRepository.insertToEvents(eventData);
 
         // Update the UI
         setState(() {});
@@ -72,7 +87,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
     });
   }
 
-  Future<void> downloadEmployees() async {
+  Future<void> downloadData() async {
     await fetchDataAndSync(); // Call your fetch data method
   }
 
@@ -88,7 +103,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
             icon: Icon(Icons.refresh),
           ),
           IconButton(
-            onPressed: downloadEmployees,
+            onPressed: downloadData,
             icon: Icon(Icons.file_download),
           ),
         ],

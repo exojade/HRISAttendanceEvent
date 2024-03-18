@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:diary_app/repository/notes_repository.dart';
 import 'package:diary_app/models/employee.dart';
 import '../../layouts/bottom_nav_bar.dart'; // Import your BottomNavBar widget
@@ -15,28 +13,25 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   TextEditingController searchController = TextEditingController();
   List<Employee> searchResults = [];
+  String currentEvent = 'None Stated'; // Default value for the current event
 
-  Future<void> fetchDataAndSync() async {
+  @override
+  void initState() {
+    super.initState();
+    fetchCurrentEvent(); // Fetch the current event when the screen initializes
+  }
+
+  Future<void> fetchCurrentEvent() async {
     try {
-      final response = await http
-          .get(Uri.parse('http://192.168.1.17:81/hris/fetchEmployees'));
-      if (response.statusCode == 200) {
-        List<Employee> employees =
-            (json.decode(response.body)['employees'] as List)
-                .map((data) => Employee.fromJson(data))
-                .toList();
-
-        await NoteRepository.deleteAllEmployees();
-        List<Map<String, dynamic>> employeeData =
-            employees.map((employee) => employee.toJson()).toList();
-        await NoteRepository.insertToEmployees(employeeData);
-
-        setState(() {});
-      } else {
-        throw Exception('Failed to fetch data');
+      // Fetch the current event from SQLite
+      List<Map<String, dynamic>> events = await NoteRepository.callAllEvents();
+      if (events.isNotEmpty) {
+        setState(() {
+          currentEvent = events.first['event_name'];
+        });
       }
     } catch (e) {
-      print('Error fetching and syncing data: $e');
+      currentEvent = "No Event";
     }
   }
 
@@ -61,8 +56,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Home'),
-        centerTitle: true,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Home'),
+            SizedBox(height: 4),
+            Text('Event: $currentEvent', style: TextStyle(fontSize: 14)),
+          ],
+        ),
+        centerTitle: false,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
