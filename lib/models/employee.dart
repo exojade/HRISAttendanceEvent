@@ -4,6 +4,7 @@ class Employee {
   final String lastName;
   final String department;
   final String fingerId;
+  bool hasScannedIn;
 
   Employee({
     required this.id,
@@ -11,6 +12,7 @@ class Employee {
     required this.lastName,
     required this.department,
     required this.fingerId,
+    this.hasScannedIn = false,
   });
 
   // Factory method to create an Employee object from a JSON map
@@ -21,6 +23,7 @@ class Employee {
       lastName: json['LastName'].toString(),
       department: json['Department'].toString(),
       fingerId: json['Fingerid'].toString(),
+      hasScannedIn: json['hasScannedIn'] ?? false,
     );
   }
 
@@ -32,6 +35,7 @@ class Employee {
       'LastName': lastName,
       'Department': department,
       'Fingerid': fingerId,
+      'hasScannedIn': hasScannedIn
     };
   }
 }

@@ -53,15 +53,39 @@ class _HomeScreenState extends State<HomeScreen> {
             emp.fingerId.toLowerCase() == keyword.toLowerCase())
         .toList();
 
+    // Check if employee has already scanned for the current event
+    await checkScanLogs(searchResults);
+
     setState(() {});
+  }
+
+  Future<void> checkScanLogs(List<Employee> employees) async {
+    for (Employee emp in employees) {
+      bool hasScannedIn =
+          await NoteRepository.checkScanLog(emp.id, currentEventid, 'IN');
+      if (hasScannedIn) {
+        setState(() {
+          emp.hasScannedIn = true; // Mark employee as scanned in
+        });
+      }
+    }
   }
 
   void handleInOutButtonPress(
       String eventId, String employeeId, String remarks) async {
-    // Insert scan log for IN or OUT based on the remarks
-    await NoteRepository.insertScanLog(eventId, employeeId, remarks);
-    // Refresh search results
-    searchEmployee();
+    bool hasScannedIn =
+        await NoteRepository.checkScanLog(employeeId, eventId, 'IN');
+    if (hasScannedIn) {
+      // Show alert or toast that employee has already scanned in
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Employee has already scanned in!')),
+      );
+    } else {
+      // Insert scan log for IN or OUT based on the remarks
+      await NoteRepository.insertScanLog(eventId, employeeId, remarks);
+      // Refresh search results
+      searchEmployee();
+    }
   }
 
   @override
@@ -114,6 +138,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                 handleInOutButtonPress(
                                     currentEventid, employee.id, 'IN');
                               },
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.resolveWith(
+                                  (states) {
+                                    if (employee.hasScannedIn) {
+                                      return Colors.red;
+                                    }
+                                    return null; // Use default color
+                                  },
+                                ),
+                              ),
                               child: Text('IN'),
                             ),
                             SizedBox(width: 10),
@@ -140,25 +175,17 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     Navigator.push(
-      //       context,
-      //       MaterialPageRoute(builder: (_) => const AddNoteScreen()),
-      //     );
-      //   },
-      //   backgroundColor: Theme.of(context).colorScheme.primary,
-      //   foregroundColor: Colors.white,
-      //   child: const Icon(Icons.add),
-      // ),
       bottomNavigationBar: BottomNavBar(
         currentIndex: 0, // Set the initial index of the bottom navigation bar
         onTap: (index) {
           if (index == 1) {
             Navigator.pushReplacementNamed(
                 context, '/employees'); // Navigate to EmployeesScreen
+          } else if (index == 2) {
+            Navigator.pushReplacementNamed(
+                context, '/scan_logs'); // Navigate to ScannedLogsScreen
           } else {
-            // Navigate to HomeScreen or handle other cases as needed
+            // Handle other cases as needed
           }
         },
       ),

@@ -95,6 +95,23 @@ LEFT JOIN events ON events.event_id = scan_logs.event_id;
     return res;
   }
 
+  static Future<bool> checkScanLog(
+      String employeeId, String eventId, String remarks) async {
+    try {
+      final db = await _database();
+      final List<Map<String, dynamic>> logs = await db.rawQuery(
+        'SELECT * FROM scan_logs '
+        'WHERE Employeeid = ? AND event_id = ? AND remarks = ?',
+        [employeeId, eventId, remarks],
+      );
+
+      return logs.isNotEmpty; // Return true if logs are found, false otherwise
+    } catch (e) {
+      print('Error checking scan logs: $e');
+      return false; // Return false in case of an error
+    }
+  }
+
   static Future<void> deleteActiveEvent() async {
     final db = await _database();
     await db.delete(_event); // Delete all rows from the events table
