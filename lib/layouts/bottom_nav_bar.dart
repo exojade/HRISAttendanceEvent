@@ -15,10 +15,9 @@ class BottomNavBar extends StatelessWidget {
     return BottomNavigationBar(
       currentIndex: currentIndex,
       onTap: onTap,
-      backgroundColor: Colors.blue, // Set the background color to blue
-      selectedItemColor: Colors.black, // Set the selected item text color
-      unselectedItemColor:
-          Colors.white.withOpacity(0.6), // Set the unselected item text color
+      backgroundColor: Colors.blue,
+      selectedItemColor: Colors.black,
+      unselectedItemColor: Colors.white.withOpacity(0.6),
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),

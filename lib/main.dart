@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/home/Home_screen.dart'; // Import your HomeScreen
-import 'screens/home/Employees.dart'; // Import your HomeScreen
+import 'screens/home/Employees.dart'; // Import your EmployeesScreen
+import 'screens/home/Scanned.dart'; // Import your ScannedLogsScreen
 
 void main() {
   runApp(MyApp());
@@ -16,6 +17,8 @@ class MyApp extends StatelessWidget {
         '/': (context) => HomeScreen(), // Define the route for HomeScreen
         '/employees': (context) =>
             EmployeesScreen(), // Define the route for EmployeesScreen
+        '/scan_logs': (context) =>
+            ScannedLogsScreen(), // Define the route for ScannedLogsScreen
       },
       onGenerateRoute: (settings) {
         // Handle other routes here if needed

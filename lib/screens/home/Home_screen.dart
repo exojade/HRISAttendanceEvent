@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:diary_app/repository/notes_repository.dart';
 import 'package:diary_app/models/employee.dart';
+import 'package:diary_app/models/events.dart';
+import 'package:diary_app/models/scan_logs.dart'; // Import the ScanLogs model
 import '../../layouts/bottom_nav_bar.dart'; // Import your BottomNavBar widget
 
 class HomeScreen extends StatefulWidget {
@@ -14,6 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController searchController = TextEditingController();
   List<Employee> searchResults = [];
   String currentEvent = 'None Stated'; // Default value for the current event
+  String currentEventid = '0'; // Default value for the current event
 
   @override
   void initState() {
@@ -28,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (events.isNotEmpty) {
         setState(() {
           currentEvent = events.first['event_name'];
+          currentEventid = events.first['event_id'];
         });
       }
     } catch (e) {
@@ -50,6 +54,14 @@ class _HomeScreenState extends State<HomeScreen> {
         .toList();
 
     setState(() {});
+  }
+
+  void handleInOutButtonPress(
+      String eventId, String employeeId, String remarks) async {
+    // Insert scan log for IN or OUT based on the remarks
+    await NoteRepository.insertScanLog(eventId, employeeId, remarks);
+    // Refresh search results
+    searchEmployee();
   }
 
   @override
@@ -99,14 +111,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             ElevatedButton(
                               onPressed: () {
-                                // Handle IN button press
+                                handleInOutButtonPress(
+                                    currentEventid, employee.id, 'IN');
                               },
                               child: Text('IN'),
                             ),
                             SizedBox(width: 10),
                             ElevatedButton(
                               onPressed: () {
-                                // Handle OUT button press
+                                handleInOutButtonPress(
+                                    currentEventid, employee.id, 'OUT');
                               },
                               child: Text('OUT'),
                             ),

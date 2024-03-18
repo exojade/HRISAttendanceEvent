@@ -3,11 +3,13 @@ import 'package:sqflite/sqflite.dart';
 
 import '../models/employee.dart';
 import '../models/events.dart';
+import '../models/scan_logs.dart';
 
 class NoteRepository {
   static const _dbName = 'hris.db';
   static const _tblemployees = 'tblemployees';
   static const _event = 'events';
+  static const _tblScanLogs = 'scan_logs';
 
   static Future<Database> _database() async {
     final dbPath = await getDatabasesPath();
@@ -33,7 +35,8 @@ class NoteRepository {
             Employeeid TEXT,
             logs_date TEXT,
             logs_time TEXT,
-            timestamp TEXT
+            timestamp TEXT,
+            remarks TEXT
           )
           ''');
     }, version: 1);
@@ -49,6 +52,46 @@ class NoteRepository {
     final db = await _database();
     var res = await db.rawQuery(
         "SELECT * FROM events"); // Select all rows from the events table
+    return res;
+  }
+
+  static Future<void> insertScanLog(
+      String eventId, String employeeId, String remarks) async {
+    final db = await _database();
+
+    // Get current date and time
+    DateTime now = DateTime.now();
+    String formattedDate = DateTime.now().toString().split(' ')[0];
+    String formattedTime = "${now.hour}:${now.minute}";
+
+    // Insert the scan log into the scan_logs table
+    await db.insert(
+      'scan_logs',
+      {
+        'event_id': eventId,
+        'Employeeid': employeeId,
+        'logs_date': formattedDate,
+        'logs_time': formattedTime,
+        'timestamp': now.toString(),
+        'remarks': remarks,
+      },
+      conflictAlgorithm:
+          ConflictAlgorithm.replace, // Replace existing logs if any
+    );
+  }
+
+  static Future<List<Map<String, dynamic>>> getAllScanLogs() async {
+    final db = await _database();
+    var res = await db.rawQuery('''
+      SELECT e.FirstName || ' ' || e.LastName AS fullname, 
+       events.event_name, 
+       scan_logs.logs_date || ' ' || scan_logs.logs_time AS date,
+       scan_logs.remarks
+FROM scan_logs
+LEFT JOIN tblemployees e ON e.Employeeid = scan_logs.Employeeid
+LEFT JOIN events ON events.event_id = scan_logs.event_id;
+
+    ''');
     return res;
   }
 
