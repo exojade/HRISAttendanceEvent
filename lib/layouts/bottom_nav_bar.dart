@@ -31,14 +31,14 @@ class BottomNavBar extends StatelessWidget {
           icon: Icon(Icons.assignment),
           label: 'Scan Logs',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.notifications),
-          label: 'Notifications',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.account_circle),
-          label: 'Profile',
-        ),
+        // BottomNavigationBarItem(
+        //   icon: Icon(Icons.notifications),
+        //   label: 'Notifications',
+        // ),
+        // BottomNavigationBarItem(
+        //   icon: Icon(Icons.account_circle),
+        //   label: 'Profile',
+        // ),
       ],
     );
   }

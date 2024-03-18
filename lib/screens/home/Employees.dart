@@ -15,13 +15,18 @@ class EmployeesScreen extends StatefulWidget {
 
 class _EmployeesScreenState extends State<EmployeesScreen> {
   int _currentIndex = 1; // Index for EmployeesScreen
+  bool _isDownloading = false; // Flag to track download state
 
   Future<void> fetchDataAndSync() async {
     try {
+      setState(() {
+        _isDownloading = true; // Set downloading flag to true
+      });
+
       final employeeResponse = await http
-          .get(Uri.parse('http://192.168.1.21:81/hris/fetchEmployees'));
+          .get(Uri.parse('http://203.177.88.234:7000/hris/fetchEmployees'));
       final eventResponse = await http
-          .get(Uri.parse('http://192.168.1.21:81/hris/fetchEventActive'));
+          .get(Uri.parse('http://203.177.88.234:7000/hris/fetchEventActive'));
 
       if (employeeResponse.statusCode == 200 &&
           eventResponse.statusCode == 200) {
@@ -49,7 +54,9 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
         await NoteRepository.insertToEvents(eventData);
 
         // Update the UI
-        setState(() {});
+        setState(() {
+          _isDownloading = false; // Set downloading flag to false
+        });
 
         // Get and show employee count
         int count = await NoteRepository.getEmployeeCount();
@@ -58,6 +65,9 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
         throw Exception('Failed to fetch data');
       }
     } catch (e) {
+      setState(() {
+        _isDownloading = false; // Set downloading flag to false on error
+      });
       print('Error fetching and syncing data: $e');
     }
   }
@@ -88,7 +98,30 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
   }
 
   Future<void> downloadData() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dialog from closing on outside tap
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Padding(
+            padding: EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 10),
+                Text("Downloading data..."),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
     await fetchDataAndSync(); // Call your fetch data method
+
+    // Close the dialog when data is fetched
+    Navigator.of(context).pop();
   }
 
   @override
@@ -108,37 +141,42 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
           ),
         ],
       ),
-      body: FutureBuilder<List<Employee>>(
-        future: NoteRepository.getEmployees(),
-        builder: (context, AsyncSnapshot<List<Employee>> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-              return ListView.builder(
-                padding: EdgeInsets.all(15),
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  final employee = snapshot.data![index];
-                  return ListTile(
-                    title: Text('${employee.firstName} ${employee.lastName}'),
-                    subtitle: Text(employee.department),
+      body: _isDownloading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : FutureBuilder<List<Employee>>(
+              future: NoteRepository.getEmployees(),
+              builder: (context, AsyncSnapshot<List<Employee>> snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                    return ListView.builder(
+                      padding: EdgeInsets.all(15),
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (context, index) {
+                        final employee = snapshot.data![index];
+                        return ListTile(
+                          title:
+                              Text('${employee.firstName} ${employee.lastName}'),
+                          subtitle: Text(employee.department),
+                        );
+                      },
+                    );
+                  } else {
+                    return Center(
+                      child: Text("No employees found."),
+                    );
+                  }
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Text("Error: ${snapshot.error}"),
                   );
-                },
-              );
-            } else {
-              return Center(
-                child: Text("No employees found."),
-              );
-            }
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text("Error: ${snapshot.error}"),
-            );
-          }
-          return Center(
-            child: CircularProgressIndicator(),
-          );
-        },
-      ),
+                }
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              },
+            ),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
         onTap: _onNavBarItemTapped,

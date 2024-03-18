@@ -63,25 +63,40 @@ class _HomeScreenState extends State<HomeScreen> {
     for (Employee emp in employees) {
       bool hasScannedIn =
           await NoteRepository.checkScanLog(emp.id, currentEventid, 'IN');
+      bool hasScannedOut =
+          await NoteRepository.checkScanLog(emp.id, currentEventid, 'OUT');
       if (hasScannedIn) {
         setState(() {
           emp.hasScannedIn = true; // Mark employee as scanned in
         });
       }
+      if (hasScannedOut) {
+        setState(() {
+          emp.hasScannedOut = true; // Mark employee as scanned out
+        });
+      }
     }
   }
 
-  void handleInOutButtonPress(
+  void handleScanLogPress(
       String eventId, String employeeId, String remarks) async {
     bool hasScannedIn =
         await NoteRepository.checkScanLog(employeeId, eventId, 'IN');
-    if (hasScannedIn) {
+    bool hasScannedOut =
+        await NoteRepository.checkScanLog(employeeId, eventId, 'OUT');
+
+    if (remarks == 'IN' && hasScannedIn) {
       // Show alert or toast that employee has already scanned in
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Employee has already scanned in!')),
       );
+    } else if (remarks == 'OUT' && hasScannedOut) {
+      // Show alert or toast that employee has already scanned out
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Employee has already scanned out!')),
+      );
     } else {
-      // Insert scan log for IN or OUT based on the remarks
+      // Insert scan log based on remarks
       await NoteRepository.insertScanLog(eventId, employeeId, remarks);
       // Refresh search results
       searchEmployee();
@@ -135,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             ElevatedButton(
                               onPressed: () {
-                                handleInOutButtonPress(
+                                handleScanLogPress(
                                     currentEventid, employee.id, 'IN');
                               },
                               style: ButtonStyle(
@@ -154,9 +169,20 @@ class _HomeScreenState extends State<HomeScreen> {
                             SizedBox(width: 10),
                             ElevatedButton(
                               onPressed: () {
-                                handleInOutButtonPress(
+                                handleScanLogPress(
                                     currentEventid, employee.id, 'OUT');
                               },
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.resolveWith(
+                                  (states) {
+                                    if (employee.hasScannedOut) {
+                                      return Colors.red;
+                                    }
+                                    return null; // Use default color
+                                  },
+                                ),
+                              ),
                               child: Text('OUT'),
                             ),
                           ],
@@ -192,3 +218,5 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+

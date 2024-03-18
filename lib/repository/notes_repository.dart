@@ -215,3 +215,5 @@ LEFT JOIN events ON events.event_id = scan_logs.event_id;
     });
   }
 }
+
+
