@@ -19,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String currentEvent = 'None Stated'; // Default value for the current event
   String currentEventid = '0';
   String loggedInUserName = '';
+  String loggedInUserId = '';
   // Default value for the current event
 
   @override
@@ -34,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (users.isNotEmpty) {
         setState(() {
           loggedInUserName = users.first.fullname;
+          loggedInUserId = users.first.userId;
         });
       }
     } catch (e) {
@@ -95,6 +97,46 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _showLogoutConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Logout'),
+          content: Text('Are you sure you want to logout?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+                _logout();
+                // Perform logout actions here, such as clearing data
+                // and navigating back to the login screen
+              },
+              child: Text('Logout'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _logout() async {
+  // Clear user-related data from SQLite
+  await NoteRepository.deleteUsers();
+  
+  // Clear other data as needed
+  // await NoteRepository.deleteOtherData();
+
+  // Navigate back to login screen
+  Navigator.pushReplacementNamed(context, '/');
+}
+
   void handleScanLogPress(
       String eventId, String employeeId, String remarks) async {
     bool hasScannedIn =
@@ -114,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     } else {
       // Insert scan log based on remarks
-      await NoteRepository.insertScanLog(eventId, employeeId, remarks);
+      await NoteRepository.insertScanLog(eventId, employeeId, remarks, loggedInUserId);
       // Refresh search results
       searchEmployee();
     }
@@ -123,23 +165,26 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      appBar: PreferredSize(
+      preferredSize: Size.fromHeight(120.0), // Set the preferred height
+      child: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Home'),
-            SizedBox(height: 4),
+            
             Text('Welcome, $loggedInUserName'),
-            Text('Event: $currentEvent', style: TextStyle(fontSize: 14)),
+           
           ],
         ),
         centerTitle: false,
       ),
+    ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+             Text('Event: $currentEvent', style: TextStyle(fontSize: 14)),
             TextField(
               controller: searchController,
               decoration: InputDecoration(
@@ -184,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               child: Text('IN'),
                             ),
-                            SizedBox(width: 10),
+                            /* SizedBox(width: 10),
                             ElevatedButton(
                               onPressed: () {
                                 handleScanLogPress(
@@ -202,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                               child: Text('OUT'),
-                            ),
+                            ), */
                           ],
                         ),
                       ),
@@ -228,6 +273,9 @@ class _HomeScreenState extends State<HomeScreen> {
           } else if (index == 2) {
             Navigator.pushReplacementNamed(
                 context, '/scan_logs'); // Navigate to ScannedLogsScreen
+          } else if (index == 3) {
+            _showLogoutConfirmation(context);
+             // Navigate to ScannedLogsScreen
           } else {
             // Handle other cases as needed
           }

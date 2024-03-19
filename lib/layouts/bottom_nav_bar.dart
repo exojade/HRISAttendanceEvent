@@ -18,6 +18,7 @@ class BottomNavBar extends StatelessWidget {
       backgroundColor: Colors.blue,
       selectedItemColor: Colors.black,
       unselectedItemColor: Colors.white.withOpacity(0.6),
+      type: BottomNavigationBarType.fixed, // Ensure fixed background color
       items: const [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
@@ -31,14 +32,10 @@ class BottomNavBar extends StatelessWidget {
           icon: Icon(Icons.assignment),
           label: 'Scan Logs',
         ),
-        // BottomNavigationBarItem(
-        //   icon: Icon(Icons.notifications),
-        //   label: 'Notifications',
-        // ),
-        // BottomNavigationBarItem(
-        //   icon: Icon(Icons.account_circle),
-        //   label: 'Profile',
-        // ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.logout), // Add logout button
+          label: 'Logout',
+        ),
       ],
     );
   }

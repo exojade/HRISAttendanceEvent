@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'repository/notes_repository.dart'; // Import your NoteRepository
-
 import 'screens/home/Home_screen.dart'; // Import your HomeScreen
 import 'screens/home/Employees.dart'; // Import your EmployeesScreen
 import 'screens/home/Scanned.dart'; // Import your ScannedLogsScreen
@@ -25,13 +24,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'My App',
-      initialRoute:
-          userCount > 0 ? '/home' : '/', // Navigate based on user count
+      home: userCount > 0 ? HomeScreen() : LoginScreen(), // Set home based on user count
       routes: {
-        '/': (context) => LoginScreen(),
         '/home': (context) => HomeScreen(),
         '/employees': (context) => EmployeesScreen(),
         '/scan_logs': (context) => ScannedLogsScreen(),
+        '/': (context) => LoginScreen(),
       },
       onGenerateRoute: (settings) {
         return MaterialPageRoute(builder: (context) => NotFoundScreen());

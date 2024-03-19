@@ -8,6 +8,7 @@ class ScanLogs {
   final String logsTime;
   final String timestamp;
   final String remarks;
+  final String user_id;
 
   ScanLogs({
     required this.logsId,
@@ -17,6 +18,7 @@ class ScanLogs {
     required this.logsTime,
     required this.timestamp,
     required this.remarks,
+    required this.user_id,
   });
 
   factory ScanLogs.fromJson(Map<String, dynamic> json) {
@@ -28,6 +30,7 @@ class ScanLogs {
       logsTime: json['logs_time'],
       timestamp: json['timestamp'],
       remarks: json['remarks'],
+      user_id: json['user_id'],
     );
   }
 
@@ -40,6 +43,7 @@ class ScanLogs {
       'logs_time': logsTime,
       'timestamp': timestamp,
       'remarks': remarks,
+      'user_id': user_id,
     };
   }
 }

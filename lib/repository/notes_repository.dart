@@ -47,7 +47,8 @@ class NoteRepository {
             logs_date TEXT,
             logs_time TEXT,
             timestamp TEXT,
-            remarks TEXT
+            remarks TEXT,
+            user_id TEXT
           )
           ''');
     }, version: 1);
@@ -63,11 +64,17 @@ class NoteRepository {
       final db = await _database();
       final count = Sqflite.firstIntValue(
           await db.rawQuery('SELECT COUNT(*) FROM $_usersTable'));
+          print ("user count = " + count.toString());
       return count ?? 0;
     } catch (e) {
       print('Error getting user count: $e');
       return 0;
     }
+  }
+
+  static Future<void> deleteUsers() async {
+    final db = await _database();
+    await db.delete('users');
   }
 
   static Future<void> deleteAllEmployees() async {
@@ -82,7 +89,7 @@ class NoteRepository {
   }
 
   static Future<void> insertScanLog(
-      String eventId, String employeeId, String remarks) async {
+      String eventId, String employeeId, String remarks, String user_id) async {
     final db = await _database();
 
     DateTime now = DateTime.now();
@@ -98,6 +105,7 @@ class NoteRepository {
         'logs_time': formattedTime,
         'timestamp': now.toString(),
         'remarks': remarks,
+        'user_id': user_id,
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -107,12 +115,17 @@ class NoteRepository {
     final db = await _database();
     var res = await db.rawQuery('''
       SELECT e.FirstName || ' ' || e.LastName AS fullname, 
+u.fullname as scanner_fullname, 
+e.Department,
        events.event_name, 
-       scan_logs.logs_date || ' ' || scan_logs.logs_time AS date,
+       scan_logs.logs_date AS date,
+       scan_logs.logs_time as time,
        scan_logs.remarks
 FROM scan_logs
 LEFT JOIN tblemployees e ON e.Employeeid = scan_logs.Employeeid
-LEFT JOIN events ON events.event_id = scan_logs.event_id;
+LEFT JOIN events ON events.event_id = scan_logs.event_id
+LEFT JOIN users u on u.user_id = scan_logs.user_id
+;
 
     ''');
     return res;
@@ -273,5 +286,10 @@ LEFT JOIN events ON events.event_id = scan_logs.event_id;
   static Future<void> deleteAllUsers() async {
     final db = await _database();
     await db.delete(_usersTable);
+  }
+
+  static Future<void> deleteScanLogs() async {
+    final db = await _database();
+    await db.delete(_tblScanLogs);
   }
 }

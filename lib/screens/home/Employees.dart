@@ -17,6 +17,48 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
   int _currentIndex = 1; // Index for EmployeesScreen
   bool _isDownloading = false; // Flag to track download state
 
+void _showLogoutConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Logout'),
+          content: Text('Are you sure you want to logout?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+                _logout();
+                // Perform logout actions here, such as clearing data
+                // and navigating back to the login screen
+              },
+              child: Text('Logout'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _logout() async {
+  // Clear user-related data from SQLite
+  await NoteRepository.deleteUsers();
+  
+  // Clear other data as needed
+  // await NoteRepository.deleteOtherData();
+
+  // Navigate back to login screen
+  Navigator.pushReplacementNamed(context, '/');
+}
+
+
+
   Future<void> fetchDataAndSync() async {
     try {
       setState(() {
@@ -77,7 +119,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
       _currentIndex = index;
       switch (_currentIndex) {
         case 0:
-          Navigator.pushReplacementNamed(context, '/');
+          Navigator.pushReplacementNamed(context, '/home');
           break;
         case 1:
           // Do nothing, already on EmployeesScreen
@@ -86,11 +128,9 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
           Navigator.pushReplacementNamed(context, '/scan_logs');
           break;
         case 3:
-          Navigator.pushReplacementNamed(context, '/notifications');
+          _showLogoutConfirmation(context);
           break;
-        case 4:
-          Navigator.pushReplacementNamed(context, '/profile');
-          break;
+     
         default:
           break;
       }
@@ -117,6 +157,17 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
         );
       },
     );
+
+    void _logout() async {
+  // Clear user-related data from SQLite
+  await NoteRepository.deleteUsers();
+  
+  // Clear other data as needed
+  // await NoteRepository.deleteOtherData();
+
+  // Navigate back to login screen
+  Navigator.pushReplacementNamed(context, '/');
+}
 
     await fetchDataAndSync(); // Call your fetch data method
 
