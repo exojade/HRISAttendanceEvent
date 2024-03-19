@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:diary_app/repository/notes_repository.dart';
 import 'package:diary_app/models/employee.dart';
 import 'package:diary_app/models/events.dart';
+import 'package:diary_app/models/users.dart';
 import 'package:diary_app/models/scan_logs.dart'; // Import the ScanLogs model
 import '../../layouts/bottom_nav_bar.dart'; // Import your BottomNavBar widget
 
@@ -16,12 +17,28 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController searchController = TextEditingController();
   List<Employee> searchResults = [];
   String currentEvent = 'None Stated'; // Default value for the current event
-  String currentEventid = '0'; // Default value for the current event
+  String currentEventid = '0';
+  String loggedInUserName = '';
+  // Default value for the current event
 
   @override
   void initState() {
     super.initState();
     fetchCurrentEvent(); // Fetch the current event when the screen initializes
+    fetchLoggedInUser();
+  }
+
+  Future<void> fetchLoggedInUser() async {
+    try {
+      List<User> users = await NoteRepository.getUsers();
+      if (users.isNotEmpty) {
+        setState(() {
+          loggedInUserName = users.first.fullname;
+        });
+      }
+    } catch (e) {
+      print('Error fetching logged-in user: $e');
+    }
   }
 
   Future<void> fetchCurrentEvent() async {
@@ -112,6 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Text('Home'),
             SizedBox(height: 4),
+            Text('Welcome, $loggedInUserName'),
             Text('Event: $currentEvent', style: TextStyle(fontSize: 14)),
           ],
         ),
@@ -218,5 +236,3 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
-
-
