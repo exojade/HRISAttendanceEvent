@@ -1,27 +1,39 @@
 import 'package:flutter/material.dart';
+import 'repository/notes_repository.dart'; // Import your NoteRepository
+
 import 'screens/home/Home_screen.dart'; // Import your HomeScreen
 import 'screens/home/Employees.dart'; // Import your EmployeesScreen
 import 'screens/home/Scanned.dart'; // Import your ScannedLogsScreen
+import 'screens/home/Login.dart'; // Import your LoginScreen
 
-void main() {
-  runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter is initialized
+
+  // Initialize the database and get the user count
+  await NoteRepository.initDatabase();
+  int userCount = await NoteRepository.getUserCount();
+
+  runApp(MyApp(userCount: userCount));
 }
 
 class MyApp extends StatelessWidget {
+  final int userCount;
+
+  const MyApp({Key? key, required this.userCount}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'My App',
-      initialRoute: '/', // Set the initial route
+      initialRoute:
+          userCount > 0 ? '/home' : '/', // Navigate based on user count
       routes: {
-        '/': (context) => HomeScreen(), // Define the route for HomeScreen
-        '/employees': (context) =>
-            EmployeesScreen(), // Define the route for EmployeesScreen
-        '/scan_logs': (context) =>
-            ScannedLogsScreen(), // Define the route for ScannedLogsScreen
+        '/': (context) => LoginScreen(),
+        '/home': (context) => HomeScreen(),
+        '/employees': (context) => EmployeesScreen(),
+        '/scan_logs': (context) => ScannedLogsScreen(),
       },
       onGenerateRoute: (settings) {
-        // Handle other routes here if needed
         return MaterialPageRoute(builder: (context) => NotFoundScreen());
       },
     );

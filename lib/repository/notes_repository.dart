@@ -4,12 +4,14 @@ import 'package:sqflite/sqflite.dart';
 import '../models/employee.dart';
 import '../models/events.dart';
 import '../models/scan_logs.dart';
+import '../models/users.dart';
 
 class NoteRepository {
   static const _dbName = 'hris.db';
   static const _tblemployees = 'tblemployees';
   static const _event = 'events';
   static const _tblScanLogs = 'scan_logs';
+  static const _usersTable = 'users';
 
   static Future<Database> _database() async {
     final dbPath = await getDatabasesPath();
@@ -27,9 +29,18 @@ class NoteRepository {
           )
           ''');
 
+      db.execute('''
+          CREATE TABLE $_usersTable (
+            user_id TEXT PRIMARY KEY,
+            username TEXT,
+            password TEXT,
+            fullname TEXT
+          )
+          ''');
+
       // Create the scan_logs table if needed
       db.execute('''
-          CREATE TABLE IF NOT EXISTS scan_logs (
+          CREATE TABLE IF NOT EXISTS $_tblScanLogs (
             logs_id TEXT PRIMARY KEY,
             event_id TEXT,
             Employeeid TEXT,
@@ -43,15 +54,30 @@ class NoteRepository {
     return database;
   }
 
+  static Future<void> initDatabase() async {
+    await _database();
+  }
+
+  static Future<int> getUserCount() async {
+    try {
+      final db = await _database();
+      final count = Sqflite.firstIntValue(
+          await db.rawQuery('SELECT COUNT(*) FROM $_usersTable'));
+      return count ?? 0;
+    } catch (e) {
+      print('Error getting user count: $e');
+      return 0;
+    }
+  }
+
   static Future<void> deleteAllEmployees() async {
     final db = await _database();
-    await db.delete(_tblemployees); // Delete all rows from the employees table
+    await db.delete(_tblemployees);
   }
 
   static Future<List<Map<String, dynamic>>> callAllEvents() async {
     final db = await _database();
-    var res = await db.rawQuery(
-        "SELECT * FROM events"); // Select all rows from the events table
+    var res = await db.rawQuery("SELECT * FROM $_event");
     return res;
   }
 
@@ -59,14 +85,12 @@ class NoteRepository {
       String eventId, String employeeId, String remarks) async {
     final db = await _database();
 
-    // Get current date and time
     DateTime now = DateTime.now();
     String formattedDate = DateTime.now().toString().split(' ')[0];
     String formattedTime = "${now.hour}:${now.minute}";
 
-    // Insert the scan log into the scan_logs table
     await db.insert(
-      'scan_logs',
+      _tblScanLogs,
       {
         'event_id': eventId,
         'Employeeid': employeeId,
@@ -75,8 +99,7 @@ class NoteRepository {
         'timestamp': now.toString(),
         'remarks': remarks,
       },
-      conflictAlgorithm:
-          ConflictAlgorithm.replace, // Replace existing logs if any
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
@@ -214,6 +237,41 @@ LEFT JOIN events ON events.event_id = scan_logs.event_id;
       );
     });
   }
+
+  static Future<void> insertUser(User user) async {
+    final db = await _database();
+    await db.insert(
+      _usersTable,
+      user.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  static Future<List<User>> getUsers() async {
+    final db = await _database();
+    final List<Map<String, dynamic>> userMaps = await db.query('users');
+    return List.generate(userMaps.length, (i) {
+      return User(
+        userId: userMaps[i]['user_id'],
+        fullname: userMaps[i]['fullname'],
+        username: userMaps[i]['username'],
+        password: "",
+      );
+    });
+  }
+
+  static Future<bool> isUserExist(String userId) async {
+    final db = await _database();
+    final List<Map<String, dynamic>> result = await db.query(
+      _usersTable,
+      where: 'user_id = ?',
+      whereArgs: [userId],
+    );
+    return result.isNotEmpty;
+  }
+
+  static Future<void> deleteAllUsers() async {
+    final db = await _database();
+    await db.delete(_usersTable);
+  }
 }
-
-
