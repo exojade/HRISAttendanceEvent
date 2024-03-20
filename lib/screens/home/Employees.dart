@@ -17,7 +17,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
   int _currentIndex = 1; // Index for EmployeesScreen
   bool _isDownloading = false; // Flag to track download state
 
-void _showLogoutConfirmation(BuildContext context) {
+  void _showLogoutConfirmation(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -47,17 +47,15 @@ void _showLogoutConfirmation(BuildContext context) {
   }
 
   void _logout() async {
-  // Clear user-related data from SQLite
-  await NoteRepository.deleteUsers();
-  
-  // Clear other data as needed
-  // await NoteRepository.deleteOtherData();
+    // Clear user-related data from SQLite
+    await NoteRepository.deleteUsers();
 
-  // Navigate back to login screen
-  Navigator.pushReplacementNamed(context, '/');
-}
+    // Clear other data as needed
+    // await NoteRepository.deleteOtherData();
 
-
+    // Navigate back to login screen
+    Navigator.pushReplacementNamed(context, '/');
+  }
 
   Future<void> fetchDataAndSync() async {
     try {
@@ -130,7 +128,7 @@ void _showLogoutConfirmation(BuildContext context) {
         case 3:
           _showLogoutConfirmation(context);
           break;
-     
+
         default:
           break;
       }
@@ -159,15 +157,15 @@ void _showLogoutConfirmation(BuildContext context) {
     );
 
     void _logout() async {
-  // Clear user-related data from SQLite
-  await NoteRepository.deleteUsers();
-  
-  // Clear other data as needed
-  // await NoteRepository.deleteOtherData();
+      // Clear user-related data from SQLite
+      await NoteRepository.deleteUsers();
 
-  // Navigate back to login screen
-  Navigator.pushReplacementNamed(context, '/');
-}
+      // Clear other data as needed
+      // await NoteRepository.deleteOtherData();
+
+      // Navigate back to login screen
+      Navigator.pushReplacementNamed(context, '/');
+    }
 
     await fetchDataAndSync(); // Call your fetch data method
 
@@ -182,10 +180,10 @@ void _showLogoutConfirmation(BuildContext context) {
         title: Text('Employee List'),
         centerTitle: true,
         actions: [
-          IconButton(
-            onPressed: fetchDataAndSync,
-            icon: Icon(Icons.refresh),
-          ),
+          // IconButton(
+          //   onPressed: fetchDataAndSync,
+          //   icon: Icon(Icons.refresh),
+          // ),
           IconButton(
             onPressed: downloadData,
             icon: Icon(Icons.file_download),
@@ -207,8 +205,8 @@ void _showLogoutConfirmation(BuildContext context) {
                       itemBuilder: (context, index) {
                         final employee = snapshot.data![index];
                         return ListTile(
-                          title:
-                              Text('${employee.firstName} ${employee.lastName}'),
+                          title: Text(
+                              '${employee.firstName} ${employee.lastName}'),
                           subtitle: Text(employee.department),
                         );
                       },

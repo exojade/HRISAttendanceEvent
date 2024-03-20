@@ -82,7 +82,11 @@ class _HomeScreenState extends State<HomeScreen> {
     // Check if employee has already scanned for the current event
     await checkScanLogs(searchResults);
 
-    setState(() {});
+    setState(() {
+      // Clear the search text field and refocus it
+      // searchController.clear();
+      // FocusScope.of(context).requestFocus(FocusNode());
+    });
   }
 
   Future<void> checkScanLogs(List<Employee> employees) async {
@@ -96,11 +100,11 @@ class _HomeScreenState extends State<HomeScreen> {
           emp.hasScannedIn = true; // Mark employee as scanned in
         });
       }
-      if (hasScannedOut) {
-        setState(() {
-          emp.hasScannedOut = true; // Mark employee as scanned out
-        });
-      }
+      // if (hasScannedOut) {
+      //   setState(() {
+      //     emp.hasScannedOut = true; // Mark employee as scanned out
+      //   });
+      // }
     }
   }
 
@@ -153,9 +157,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (remarks == 'IN' && hasScannedIn) {
       // Show alert or toast that employee has already scanned in
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Employee has already scanned in!')),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('Employee has already scanned in!')),
+      // );
+      showUndoDialog(eventId, employeeId);
     } else if (remarks == 'OUT' && hasScannedOut) {
       // Show alert or toast that employee has already scanned out
       ScaffoldMessenger.of(context).showSnackBar(
@@ -170,11 +175,54 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void showUndoDialog(String eventId, String employeeId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Undo'),
+          content: Text('Are you sure you want to undo this scan log?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                // Perform the undo operation here
+                bool success =
+                    await NoteRepository.undoScanLog(employeeId, eventId);
+                if (success) {
+                  Navigator.of(context).pop(); // Close the dialog
+                  // Show a success message or update UI as needed
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Scan log undone successfully!')),
+                  );
+                  searchEmployee();
+                } else {
+                  Navigator.of(context).pop(); // Close the dialog
+                  // Show an error message or handle the failure
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to undo scan log!')),
+                  );
+                  searchEmployee();
+                }
+              },
+              child: Text('Confirm'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(120.0), // Set the preferred height
+        preferredSize: Size.fromHeight(50.0), // Set the preferred height
         child: AppBar(
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,6 +243,14 @@ class _HomeScreenState extends State<HomeScreen> {
               controller: searchController,
               decoration: InputDecoration(
                 hintText: 'Search by Finger ID, First Name, or Last Name',
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.clear),
+                  onPressed: () {
+                    setState(() {
+                      searchController.clear();
+                    });
+                  },
+                ),
               ),
             ),
             SizedBox(height: 10),
@@ -213,7 +269,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: ListTile(
                         title:
                             Text('${employee.firstName} ${employee.lastName}'),
-                        subtitle: Text('Finger ID: ${employee.fingerId}'),
+                        subtitle: Text(
+                            '(${employee.department}) ID: ${employee.fingerId} '),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

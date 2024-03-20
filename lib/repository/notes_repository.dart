@@ -165,6 +165,24 @@ LEFT JOIN users u on u.user_id = scan_logs.user_id
     }
   }
 
+  static Future<bool> undoScanLog(String employeeId, String eventId) async {
+    try {
+      final db = await _database();
+      // Delete the scan log based on employeeId and eventId
+      int rowsAffected = await db.delete(
+        _tblScanLogs,
+        where: 'Employeeid = ? AND event_id = ?',
+        whereArgs: [employeeId, eventId],
+      );
+
+      // Check if any rows were affected (scan log deleted)
+      return rowsAffected > 0;
+    } catch (e) {
+      print('Error undoing scan log: $e');
+      return false; // Return false in case of an error
+    }
+  }
+
   static Future<bool> employeeExists(String searchKeyword) async {
     try {
       final db = await _database();

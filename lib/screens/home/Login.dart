@@ -18,8 +18,28 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _isConnected = true;
+
+  @override
+  void initState() {
+    super.initState();
+    checkConnectivity();
+  }
+
+  Future<void> checkConnectivity() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    setState(() {
+      _isConnected = connectivityResult != ConnectivityResult.none;
+    });
+  }
 
   Future<void> _login() async {
+    if (!_isConnected) {
+      // Show a message or dialog indicating no internet connection
+      showNoInternetToast();
+      return;
+    }
+
     String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
 
@@ -36,19 +56,19 @@ class _LoginScreenState extends State<LoginScreen> {
     if (isAuthenticated) {
       onLoginSuccess(); // Call the success handler
     } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Login Failed'),
-          content: Text('Invalid username or password.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('OK'),
-            ),
-          ],
-        ),
-      );
+      // showDialog(
+      //   context: context,
+      //   builder: (context) => AlertDialog(
+      //     title: Text('Login Failed'),
+      //     content: Text('Invalid username or password.'),
+      //     actions: [
+      //       TextButton(
+      //         onPressed: () => Navigator.pop(context),
+      //         child: Text('OK'),
+      //       ),
+      //     ],
+      //   ),
+      // );
     }
   }
 
@@ -63,8 +83,11 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (response.statusCode == 200) {
+        print("sulod diri sa 200");
         var data = jsonDecode(response.body);
+        print(data);
         if (data['status'] == 'success' && data['employee'].isNotEmpty) {
+          print("tama credentials");
           var employeeData = data['employee'];
           String fullname = employeeData['fullname'];
           String userId = employeeData['user_id'].toString();
@@ -77,12 +100,29 @@ class _LoginScreenState extends State<LoginScreen> {
           ));
 
           return true; // Authentication successful
+        } else {
+          print("mali credentials");
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Login Failed'),
+              content: Text('Invalid username or password.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('OK'),
+                ),
+              ],
+            ),
+          );
         }
+      } else {
+        showNoInternetToast();
       }
     } catch (e) {
       print('Error authenticating user: $e');
-      // Handle internet connection error
       showNoInternetToast();
+      // Handle internet connection error
     }
 
     return false; // Authentication failed
@@ -110,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login'),
+        title: Text('WELCOME'),
         centerTitle: true,
       ),
       body: _isLoading ? _buildLoadingIndicator() : _buildLoginForm(),
@@ -134,16 +174,13 @@ class _LoginScreenState extends State<LoginScreen> {
             width: 150, // Adjust the width as needed
             height: 150, // Adjust the height as needed
           ),
-
-          SizedBox(
-              height: 20.0), // Add some space between the logo and title text
+          SizedBox(height: 20.0),
           Text(
             'HR Attendance Monitoring for Events',
-            textAlign: TextAlign
-                .center, // Replace 'My App Title' with your app's actual title
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 24, // Set the font size of the title text
-              fontWeight: FontWeight.bold, // Optionally set the font weight
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
             ),
           ),
           SizedBox(height: 20.0),
