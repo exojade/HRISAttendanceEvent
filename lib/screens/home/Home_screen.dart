@@ -242,6 +242,10 @@ class _HomeScreenState extends State<HomeScreen> {
             Text('Event: $currentEvent', style: TextStyle(fontSize: 14)),
             TextField(
               controller: searchController,
+              onChanged: (value) {
+                // Call the search function here passing the updated value
+                searchEmployee();
+              },
               decoration: InputDecoration(
                 hintText: 'Search by Finger ID, First Name, or Last Name',
                 suffixIcon: IconButton(
