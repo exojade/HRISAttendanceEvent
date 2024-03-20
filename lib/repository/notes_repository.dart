@@ -64,7 +64,7 @@ class NoteRepository {
       final db = await _database();
       final count = Sqflite.firstIntValue(
           await db.rawQuery('SELECT COUNT(*) FROM $_usersTable'));
-          print ("user count = " + count.toString());
+      print("user count = " + count.toString());
       return count ?? 0;
     } catch (e) {
       print('Error getting user count: $e');
@@ -182,8 +182,14 @@ LEFT JOIN users u on u.user_id = scan_logs.user_id
     try {
       final db = await _database();
       final List<Map<String, dynamic>> employeeData = await db.rawQuery(
-          "SELECT * FROM $_tblemployees WHERE Employeeid = ? OR FirstName LIKE ? OR LastName LIKE ?",
-          [searchKeyword, '%$searchKeyword%', '%$searchKeyword%']);
+          "SELECT * FROM $_tblemployees WHERE Employeeid = ? OR FirstName LIKE ? OR LastName LIKE ? or ((FirstName || ' ' || LastName) LIKE ? or (LastName || ' ' || FirstName) LIKE ?)",
+          [
+            searchKeyword,
+            '%$searchKeyword%',
+            '%$searchKeyword%',
+            '%$searchKeyword%',
+            '%$searchKeyword%'
+          ]);
 
       return List.generate(employeeData.length, (index) {
         return Employee(

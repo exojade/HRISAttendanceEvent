@@ -96,6 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void showNoInternetToast() {
+    print("No Internet Connection");
     Fluttertoast.showToast(
       msg: 'No internet connection',
       toastLength: Toast.LENGTH_SHORT,
@@ -128,6 +129,22 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Image.asset(
+            'assets/images/login_image.png', // Replace with your image path
+            width: 150, // Adjust the width as needed
+            height: 150, // Adjust the height as needed
+          ),
+
+          SizedBox(
+              height: 20.0), // Add some space between the logo and title text
+          Text(
+            'HR Attendance Monitoring for Events', // Replace 'My App Title' with your app's actual title
+            style: TextStyle(
+              fontSize: 24, // Set the font size of the title text
+              fontWeight: FontWeight.bold, // Optionally set the font weight
+            ),
+          ),
+          SizedBox(height: 20.0),
           TextField(
             controller: _usernameController,
             decoration: InputDecoration(labelText: 'Username'),

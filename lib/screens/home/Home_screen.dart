@@ -65,12 +65,19 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     List<Employee> employees = await NoteRepository.getEmployees();
-    searchResults = employees
-        .where((emp) =>
-            emp.firstName.toLowerCase().contains(keyword.toLowerCase()) ||
-            emp.lastName.toLowerCase().contains(keyword.toLowerCase()) ||
-            emp.fingerId.toLowerCase() == keyword.toLowerCase())
-        .toList();
+    searchResults = employees.where((emp) {
+      // Convert first name and last name to lowercase for case-insensitive comparison
+      String fullName = '${emp.firstName} ${emp.lastName}'.toLowerCase();
+      String reversedFullName =
+          '${emp.lastName} ${emp.firstName}'.toLowerCase();
+      String keywordLower = keyword.toLowerCase();
+
+      return fullName
+              .contains(keywordLower) || // Search by firstName + lastName
+          reversedFullName
+              .contains(keywordLower) || // Search by lastName + firstName
+          emp.fingerId.toLowerCase() == keywordLower; // Search by finger ID
+    }).toList();
 
     // Check if employee has already scanned for the current event
     await checkScanLogs(searchResults);
@@ -127,15 +134,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _logout() async {
-  // Clear user-related data from SQLite
-  await NoteRepository.deleteUsers();
-  
-  // Clear other data as needed
-  // await NoteRepository.deleteOtherData();
+    // Clear user-related data from SQLite
+    await NoteRepository.deleteUsers();
 
-  // Navigate back to login screen
-  Navigator.pushReplacementNamed(context, '/');
-}
+    // Clear other data as needed
+    // await NoteRepository.deleteOtherData();
+
+    // Navigate back to login screen
+    Navigator.pushReplacementNamed(context, '/');
+  }
 
   void handleScanLogPress(
       String eventId, String employeeId, String remarks) async {
@@ -156,7 +163,8 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     } else {
       // Insert scan log based on remarks
-      await NoteRepository.insertScanLog(eventId, employeeId, remarks, loggedInUserId);
+      await NoteRepository.insertScanLog(
+          eventId, employeeId, remarks, loggedInUserId);
       // Refresh search results
       searchEmployee();
     }
@@ -166,25 +174,23 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-      preferredSize: Size.fromHeight(120.0), // Set the preferred height
-      child: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            
-            Text('Welcome, $loggedInUserName'),
-           
-          ],
+        preferredSize: Size.fromHeight(120.0), // Set the preferred height
+        child: AppBar(
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Welcome, $loggedInUserName'),
+            ],
+          ),
+          centerTitle: false,
         ),
-        centerTitle: false,
       ),
-    ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-             Text('Event: $currentEvent', style: TextStyle(fontSize: 14)),
+            Text('Event: $currentEvent', style: TextStyle(fontSize: 14)),
             TextField(
               controller: searchController,
               decoration: InputDecoration(
@@ -275,7 +281,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 context, '/scan_logs'); // Navigate to ScannedLogsScreen
           } else if (index == 3) {
             _showLogoutConfirmation(context);
-             // Navigate to ScannedLogsScreen
+            // Navigate to ScannedLogsScreen
           } else {
             // Handle other cases as needed
           }

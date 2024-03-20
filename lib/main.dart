@@ -24,13 +24,20 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'My App',
-      home: userCount > 0 ? HomeScreen() : LoginScreen(), // Set home based on user count
+      home: userCount > 0
+          ? HomeScreen()
+          : LoginScreen(), // Set home based on user count
       routes: {
         '/home': (context) => HomeScreen(),
         '/employees': (context) => EmployeesScreen(),
         '/scan_logs': (context) => ScannedLogsScreen(),
-        '/': (context) => LoginScreen(),
+        // '/': (context) => LoginScreen(),
       },
+      initialRoute: '/', // Set the initial route
+      // onGenerateRoute: (settings) {
+      //   // Handle dynamic routes here if needed
+      // },
+
       onGenerateRoute: (settings) {
         return MaterialPageRoute(builder: (context) => NotFoundScreen());
       },
