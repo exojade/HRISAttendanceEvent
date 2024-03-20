@@ -138,7 +138,9 @@ class _LoginScreenState extends State<LoginScreen> {
           SizedBox(
               height: 20.0), // Add some space between the logo and title text
           Text(
-            'HR Attendance Monitoring for Events', // Replace 'My App Title' with your app's actual title
+            'HR Attendance Monitoring for Events',
+            textAlign: TextAlign
+                .center, // Replace 'My App Title' with your app's actual title
             style: TextStyle(
               fontSize: 24, // Set the font size of the title text
               fontWeight: FontWeight.bold, // Optionally set the font weight
