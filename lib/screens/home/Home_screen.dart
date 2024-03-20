@@ -248,6 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () {
                     setState(() {
                       searchController.clear();
+                      searchEmployee();
                     });
                   },
                 ),
