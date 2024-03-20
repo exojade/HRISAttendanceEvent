@@ -260,10 +260,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: searchEmployee,
-              child: Text('Search'),
-            ),
+            // ElevatedButton(
+            //   onPressed: searchEmployee,
+            //   child: Text('Search'),
+            // ),
             SizedBox(height: 20),
             if (searchResults.isNotEmpty)
               Expanded(
