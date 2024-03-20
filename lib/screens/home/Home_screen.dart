@@ -60,9 +60,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> searchEmployee() async {
     String keyword = searchController.text.trim();
-    if (keyword.isEmpty) {
-      return;
-    }
+    // if (keyword.isEmpty) {
+    //   return;
+    // }
 
     List<Employee> employees = await NoteRepository.getEmployees();
     searchResults = employees.where((emp) {
