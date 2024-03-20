@@ -5,7 +5,6 @@ import '../../layouts/bottom_nav_bar.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-
 class ScannedLogsScreen extends StatefulWidget {
   const ScannedLogsScreen({Key? key}) : super(key: key);
 
@@ -34,68 +33,69 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
   }
 
   void _uploadScanLogs() async {
-  showDialog(
-    context: context,
-    barrierDismissible: false, // Prevent closing dialog on outside tap
-    builder: (BuildContext context) {
-      return Center(
-        child: CircularProgressIndicator(), // Show loading indicator
-      );
-    },
-  );
-
-  try {
-    // Convert scanLogs data to JSON format
-    List<Map<String, dynamic>> logs = scanLogs;
-    String jsonData = jsonEncode(logs);
-    print(jsonData);
-
-    // Make POST request to the API endpoint
-    final response = await http.post(
-      Uri.parse('http://203.177.88.234:7000/hris/insertLogs'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent closing dialog on outside tap
+      builder: (BuildContext context) {
+        return Center(
+          child: CircularProgressIndicator(), // Show loading indicator
+        );
       },
-      body: jsonData,
     );
 
-    // Close the loading dialog
-    Navigator.pop(context);
+    try {
+      // Convert scanLogs data to JSON format
+      List<Map<String, dynamic>> logs = scanLogs;
+      String jsonData = jsonEncode(logs);
+      print(jsonData);
 
-    // Check the response status
-    if (response.statusCode == 200) {
-      print('Logs uploaded successfully');
-      // Clear scanLogs after successful upload
-      setState(() {
-        scanLogs = [];
-      });
-
-      // Delete scan_logs data from SQLite
-      await NoteRepository.deleteScanLogs();
-    } else {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Error'),
-            content: Text('Failed to upload logs. Status code: ${response.statusCode}'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // Close the dialog
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
+      // Make POST request to the API endpoint
+      final response = await http.post(
+        Uri.parse('http://203.177.88.234:7000/hris/insertLogs'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
         },
+        body: jsonData,
       );
-    }
-  } catch (e) {
-    // Close the loading dialog
-    Navigator.pop(context);
 
-    showDialog(
+      // Close the loading dialog
+      Navigator.pop(context);
+
+      // Check the response status
+      if (response.statusCode == 200) {
+        print('Logs uploaded successfully');
+        // Clear scanLogs after successful upload
+        setState(() {
+          scanLogs = [];
+        });
+
+        // Delete scan_logs data from SQLite
+        await NoteRepository.deleteScanLogs();
+      } else {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Error'),
+              content: Text(
+                  'Failed to upload logs. Status code: ${response.statusCode}'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close the dialog
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (e) {
+      // Close the loading dialog
+      Navigator.pop(context);
+
+      showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
@@ -112,9 +112,9 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
           );
         },
       );
-    print('Error uploading logs: $e');
+      print('Error uploading logs: $e');
+    }
   }
-}
 
   void _showLogoutConfirmation(BuildContext context) {
     showDialog(
@@ -148,8 +148,6 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
     Navigator.pushReplacementNamed(context, '/');
   }
 
-  
-
   String convertTo12HourFormat(String time24Hour) {
     // Parse the input time string
     List<String> parts = time24Hour.split(':');
@@ -157,7 +155,8 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
     int minute = int.parse(parts[1]);
 
     // Create a DateTime object with today's date and the given time
-    DateTime dateTime = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, hour, minute);
+    DateTime dateTime = DateTime(DateTime.now().year, DateTime.now().month,
+        DateTime.now().day, hour, minute);
 
     // Format the DateTime object in 12-hour format
     return DateFormat.jm().format(dateTime);
@@ -185,12 +184,14 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
           final log = scanLogs[index];
           return Card(
             child: ListTile(
-              title: Text(log['fullname'] +  "(" + log["Department"] + ")" ?? 'Unknown'),
+              title: Text(
+                  log['fullname'] + "(" + log["Department"] + ")" ?? 'Unknown'),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Event: ${log['event_name'] ?? 'Unknown'}'),
-                  Text('Date: ${log['date'] + " " + convertTo12HourFormat(log["time"]) ?? 'Unknown'}'),
+                  Text(
+                      'Date: ${log['date'] + " " + convertTo12HourFormat(log["time"]) ?? 'Unknown'}'),
                   Text('Remarks: ${log['remarks'] ?? 'Unknown'}'),
                   Text('Scanned By: ${log['scanner_fullname'] ?? 'Unknown'}'),
                 ],

@@ -248,22 +248,27 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               decoration: InputDecoration(
                 hintText: 'Search by Finger ID, First Name, or Last Name',
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.clear),
-                  onPressed: () {
-                    setState(() {
-                      searchController.clear();
-                      searchEmployee();
-                    });
-                  },
-                ),
+                // suffixIcon: IconButton(
+                //   icon: Icon(Icons.clear),
+                //   onPressed: () {
+                //     setState(() {
+                //       searchController.clear();
+                //       searchEmployee();
+                //     });
+                //   },
+                // ),
               ),
             ),
             SizedBox(height: 10),
-            // ElevatedButton(
-            //   onPressed: searchEmployee,
-            //   child: Text('Search'),
-            // ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  searchController.clear();
+                  searchEmployee();
+                });
+              },
+              child: Text('Clear'),
+            ),
             SizedBox(height: 20),
             if (searchResults.isNotEmpty)
               Expanded(
@@ -271,53 +276,57 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: searchResults.length,
                   itemBuilder: (context, index) {
                     final employee = searchResults[index];
-                    return Card(
-                      child: ListTile(
-                        title:
-                            Text('${employee.firstName} ${employee.lastName}'),
-                        subtitle: Text(
-                            '(${employee.department}) ID: ${employee.fingerId} '),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ElevatedButton(
-                              onPressed: () {
-                                handleScanLogPress(
-                                    currentEventid, employee.id, 'IN');
-                              },
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.resolveWith(
-                                  (states) {
-                                    if (employee.hasScannedIn) {
-                                      return Colors.red;
-                                    }
-                                    return null; // Use default color
-                                  },
+                    return GestureDetector(
+                      onTap: () {
+                        handleScanLogPress(currentEventid, employee.id, 'IN');
+                      },
+                      child: Card(
+                        child: ListTile(
+                          title: Text(
+                              '${employee.firstName} ${employee.lastName}'),
+                          subtitle: Text(
+                            '(${employee.department}) ID: ${employee.fingerId} ',
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  handleScanLogPress(
+                                      currentEventid, employee.id, 'IN');
+                                },
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.resolveWith(
+                                    (states) {
+                                      if (employee.hasScannedIn) {
+                                        return Colors.red;
+                                      }
+                                      return null; // Use default color
+                                    },
+                                  ),
                                 ),
+                                child: Text('IN'),
                               ),
-                              child: Text('IN'),
-                            ),
-                            /* SizedBox(width: 10),
-                            ElevatedButton(
-                              onPressed: () {
-                                handleScanLogPress(
-                                    currentEventid, employee.id, 'OUT');
-                              },
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.resolveWith(
-                                  (states) {
-                                    if (employee.hasScannedOut) {
-                                      return Colors.red;
-                                    }
-                                    return null; // Use default color
-                                  },
-                                ),
-                              ),
-                              child: Text('OUT'),
-                            ), */
-                          ],
+                              /* SizedBox(width: 10),
+          ElevatedButton(
+            onPressed: () {
+              handleScanLogPress(currentEventid, employee.id, 'OUT');
+            },
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.resolveWith(
+                (states) {
+                  if (employee.hasScannedOut) {
+                    return Colors.red;
+                  }
+                  return null; // Use default color
+                },
+              ),
+            ),
+            child: Text('OUT'),
+          ), */
+                            ],
+                          ),
                         ),
                       ),
                     );
