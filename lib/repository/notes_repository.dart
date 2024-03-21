@@ -114,19 +114,18 @@ class NoteRepository {
   static Future<List<Map<String, dynamic>>> getAllScanLogs() async {
     final db = await _database();
     var res = await db.rawQuery('''
-      SELECT e.FirstName || ' ' || e.LastName AS fullname, 
-u.fullname as scanner_fullname, 
-e.Department,
-       events.event_name, 
-       scan_logs.logs_date AS date,
-       scan_logs.logs_time as time,
-       scan_logs.remarks
+      SELECT scan_logs.Employeeid, e.FirstName || ' ' || e.LastName AS fullname, 
+      u.fullname as scanner_fullname, 
+      e.Department,
+      events.event_name, 
+      scan_logs.logs_date AS date,
+      scan_logs.logs_time as time,
+      scan_logs.remarks
 FROM scan_logs
 LEFT JOIN tblemployees e ON e.Employeeid = scan_logs.Employeeid
 LEFT JOIN events ON events.event_id = scan_logs.event_id
 LEFT JOIN users u on u.user_id = scan_logs.user_id
 ;
-
     ''');
     return res;
   }
