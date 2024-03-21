@@ -14,11 +14,20 @@ class ScannedLogsScreen extends StatefulWidget {
 
 class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
   List<Map<String, dynamic>> scanLogs = [];
+  int _scanCount = 0;
 
   @override
   void initState() {
     super.initState();
     fetchScanLogs();
+    fetchEmployeeCount();
+  }
+
+  Future<void> fetchEmployeeCount() async {
+    int count = await NoteRepository.getScanLogsCount();
+    setState(() {
+      _scanCount = count;
+    });
   }
 
   Future<void> fetchScanLogs() async {
@@ -170,10 +179,21 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Scanned Logs'),
-            IconButton(
-              onPressed: _uploadScanLogs, // Call _uploadScanLogs when pressed
-              icon: Icon(Icons.cloud_upload),
+            Row(
+              children: [
+                Text('$_scanCount'), // Display scan log count
+                SizedBox(width: 5), // Add some spacing
+                IconButton(
+                  onPressed:
+                      _uploadScanLogs, // Call _uploadScanLogs when pressed
+                  icon: Icon(Icons.cloud_upload),
+                ),
+              ],
             ),
+            // IconButton(
+            //   onPressed: _uploadScanLogs, // Call _uploadScanLogs when pressed
+            //   icon: Icon(Icons.cloud_upload),
+            // ),
           ],
         ),
         centerTitle: true,

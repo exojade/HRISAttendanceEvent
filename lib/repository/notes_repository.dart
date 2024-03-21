@@ -164,6 +164,18 @@ LEFT JOIN users u on u.user_id = scan_logs.user_id
     }
   }
 
+  static Future<int> getScanLogsCount() async {
+    try {
+      final db = await _database();
+      final count = Sqflite.firstIntValue(
+          await db.rawQuery('SELECT COUNT(*) FROM $_tblScanLogs'));
+      return count ?? 0;
+    } catch (e) {
+      print('Error getting scan count: $e');
+      return 0;
+    }
+  }
+
   static Future<bool> undoScanLog(String employeeId, String eventId) async {
     try {
       final db = await _database();
@@ -199,7 +211,7 @@ LEFT JOIN users u on u.user_id = scan_logs.user_id
     try {
       final db = await _database();
       final List<Map<String, dynamic>> employeeData = await db.rawQuery(
-          "SELECT * FROM $_tblemployees WHERE Employeeid = ? OR FirstName LIKE ? OR LastName LIKE ? or ((FirstName || ' ' || LastName) LIKE ? or (LastName || ' ' || FirstName) LIKE ?)",
+          "SELECT * FROM $_tblemployees WHERE Fingerid = ? OR FirstName LIKE ? OR LastName LIKE ? or ((FirstName || ' ' || LastName) LIKE ? or (LastName || ' ' || FirstName) LIKE ?)",
           [
             searchKeyword,
             '%$searchKeyword%',

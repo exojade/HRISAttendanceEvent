@@ -16,6 +16,20 @@ class EmployeesScreen extends StatefulWidget {
 class _EmployeesScreenState extends State<EmployeesScreen> {
   int _currentIndex = 1; // Index for EmployeesScreen
   bool _isDownloading = false; // Flag to track download state
+  int _employeeCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchEmployeeCount(); // Fetch and update the employee count
+  }
+
+  Future<void> fetchEmployeeCount() async {
+    int count = await NoteRepository.getEmployeeCount();
+    setState(() {
+      _employeeCount = count;
+    });
+  }
 
   void _showLogoutConfirmation(BuildContext context) {
     showDialog(
@@ -178,12 +192,22 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Employee List'),
-        centerTitle: true,
+        // centerTitle: true,
         actions: [
           // IconButton(
           //   onPressed: fetchDataAndSync,
           //   icon: Icon(Icons.refresh),
           // ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            child: Row(
+              children: [
+                Icon(Icons.people),
+                SizedBox(width: 5),
+                Text('$_employeeCount'), // Display the employee count
+              ],
+            ),
+          ),
           IconButton(
             onPressed: downloadData,
             icon: Icon(Icons.file_download),
