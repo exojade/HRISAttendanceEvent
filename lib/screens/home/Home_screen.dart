@@ -69,6 +69,8 @@ class _HomeScreenState extends State<HomeScreen> {
     searchResults = employees.where((emp) {
       // Convert first name and last name to lowercase for case-insensitive comparison
       String fullName = '${emp.firstName} ${emp.lastName}'.toLowerCase();
+      String Fingerid = '${emp.fingerId}'.toLowerCase();
+      // print(fullName);
       String reversedFullName =
           '${emp.lastName} ${emp.firstName}'.toLowerCase();
       String keywordLower = keyword.toLowerCase();
@@ -77,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
               .contains(keywordLower) || // Search by firstName + lastName
           reversedFullName
               .contains(keywordLower) || // Search by lastName + firstName
-          emp.fingerId.toLowerCase() == keywordLower; // Search by finger ID
+          Fingerid == keywordLower; // Search by finger ID
     }).toList();
 
     // Check if employee has already scanned for the current event
