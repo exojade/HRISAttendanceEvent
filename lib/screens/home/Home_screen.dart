@@ -103,11 +103,11 @@ class _HomeScreenState extends State<HomeScreen> {
           emp.hasScannedIn = true; // Mark employee as scanned in
         });
       }
-      // if (hasScannedOut) {
-      //   setState(() {
-      //     emp.hasScannedOut = true; // Mark employee as scanned out
-      //   });
-      // }
+      if (hasScannedOut) {
+        setState(() {
+          emp.hasScannedOut = true; // Mark employee as scanned out
+        });
+      }
     }
   }
 
@@ -163,12 +163,10 @@ class _HomeScreenState extends State<HomeScreen> {
       // ScaffoldMessenger.of(context).showSnackBar(
       //   SnackBar(content: Text('Employee has already scanned in!')),
       // );
-      showUndoDialog(eventId, employeeId);
+      showUndoDialog(eventId, employeeId, "IN");
     } else if (remarks == 'OUT' && hasScannedOut) {
       // Show alert or toast that employee has already scanned out
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Employee has already scanned out!')),
-      );
+      showUndoDialog(eventId, employeeId, "OUT");
     } else {
       // Insert scan log based on remarks
       await NoteRepository.insertScanLog(
@@ -178,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void showUndoDialog(String eventId, String employeeId) {
+  void showUndoDialog(String eventId, String employeeId, String Remarks) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -195,8 +193,8 @@ class _HomeScreenState extends State<HomeScreen> {
             TextButton(
               onPressed: () async {
                 // Perform the undo operation here
-                bool success =
-                    await NoteRepository.undoScanLog(employeeId, eventId);
+                bool success = await NoteRepository.undoScanLog(
+                    employeeId, eventId, Remarks);
                 if (success) {
                   Navigator.of(context).pop(); // Close the dialog
                   // Show a success message or update UI as needed
@@ -280,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     final employee = searchResults[index];
                     return GestureDetector(
                       onTap: () {
-                        handleScanLogPress(currentEventid, employee.id, 'IN');
+                        // handleScanLogPress(currentEventid, employee.id, 'IN');
                       },
                       child: Card(
                         child: ListTile(
@@ -310,23 +308,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 child: Text('IN'),
                               ),
-                              /* SizedBox(width: 10),
-          ElevatedButton(
-            onPressed: () {
-              handleScanLogPress(currentEventid, employee.id, 'OUT');
-            },
-            style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.resolveWith(
-                (states) {
-                  if (employee.hasScannedOut) {
-                    return Colors.red;
-                  }
-                  return null; // Use default color
-                },
-              ),
-            ),
-            child: Text('OUT'),
-          ), */
+                              ElevatedButton(
+                                onPressed: () {
+                                  handleScanLogPress(
+                                      currentEventid, employee.id, 'OUT');
+                                },
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.resolveWith(
+                                    (states) {
+                                      if (employee.hasScannedOut) {
+                                        return Colors.red;
+                                      }
+                                      return null; // Use default color
+                                    },
+                                  ),
+                                ),
+                                child: Text('OUT'),
+                              ),
                             ],
                           ),
                         ),

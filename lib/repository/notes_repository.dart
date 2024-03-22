@@ -176,14 +176,15 @@ LEFT JOIN users u on u.user_id = scan_logs.user_id
     }
   }
 
-  static Future<bool> undoScanLog(String employeeId, String eventId) async {
+  static Future<bool> undoScanLog(
+      String employeeId, String eventId, String Remarks) async {
     try {
       final db = await _database();
       // Delete the scan log based on employeeId and eventId
       int rowsAffected = await db.delete(
         _tblScanLogs,
-        where: 'Employeeid = ? AND event_id = ?',
-        whereArgs: [employeeId, eventId],
+        where: 'Employeeid = ? AND event_id = ? and remarks = ?',
+        whereArgs: [employeeId, eventId, Remarks],
       );
 
       // Check if any rows were affected (scan log deleted)
