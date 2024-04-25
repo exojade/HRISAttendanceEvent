@@ -122,7 +122,7 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
       setState(() {
         _isDownloading = false; // Set downloading flag to false on error
       });
-      print('Error fetching and syncing data: $e');
+      // print('Error fetching and syncing data: $e');
     }
   }
 
@@ -170,18 +170,8 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
       },
     );
 
-    void _logout() async {
-      // Clear user-related data from SQLite
-      await NoteRepository.deleteUsers();
-
-      // Clear other data as needed
-      // await NoteRepository.deleteOtherData();
-
-      // Navigate back to login screen
-      Navigator.pushReplacementNamed(context, '/');
-    }
-
-    await fetchDataAndSync(); // Call your fetch data method
+    await fetchDataAndSync();
+    fetchEmployeeCount(); // Call your fetch data method
 
     // Close the dialog when data is fetched
     Navigator.of(context).pop();

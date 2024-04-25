@@ -83,11 +83,11 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (response.statusCode == 200) {
-        print("sulod diri sa 200");
+        // print("sulod diri sa 200");
         var data = jsonDecode(response.body);
-        print(data);
+        // print(data);
         if (data['status'] == 'success' && data['employee'].isNotEmpty) {
-          print("tama credentials");
+          // print("tama credentials");
           var employeeData = data['employee'];
           String fullname = employeeData['fullname'];
           String userId = employeeData['user_id'].toString();
@@ -101,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
           return true; // Authentication successful
         } else {
-          print("mali credentials");
+          // print("mali credentials");
           showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -120,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
         showNoInternetToast();
       }
     } catch (e) {
-      print('Error authenticating user: $e');
+      // print('Error authenticating user: $e');
       showNoInternetToast();
       // Handle internet connection error
     }
@@ -136,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void showNoInternetToast() {
-    print("No Internet Connection");
+    // print("No Internet Connection");
     Fluttertoast.showToast(
       msg: 'No internet connection',
       toastLength: Toast.LENGTH_SHORT,

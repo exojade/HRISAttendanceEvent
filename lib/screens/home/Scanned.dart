@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:diary_app/repository/notes_repository.dart';
+import 'package:diary_app/screens/home/ScannedLogsHistoryPage.dart';
 import '../../layouts/bottom_nav_bar.dart';
+import 'package:diary_app/models/users.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -16,11 +18,27 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
   List<Map<String, dynamic>> scanLogs = [];
   int _scanCount = 0;
 
+  String? _userId;
+
   @override
   void initState() {
     super.initState();
+    fetchUserId();
     fetchScanLogs();
     fetchEmployeeCount();
+  }
+
+  Future<void> fetchUserId() async {
+    try {
+      List<User> users = await NoteRepository.getUsers();
+      if (users.isNotEmpty) {
+        setState(() {
+          _userId = users.first.userId;
+        });
+      }
+    } catch (e) {
+      // print('Error fetching user id: $e');
+    }
   }
 
   Future<void> fetchEmployeeCount() async {
@@ -37,7 +55,7 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
         scanLogs = logs;
       });
     } catch (e) {
-      print('Error fetching scan logs: $e');
+      // print('Error fetching scan logs: $e');
     }
   }
 
@@ -56,7 +74,7 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
       // Convert scanLogs data to JSON format
       List<Map<String, dynamic>> logs = scanLogs;
       String jsonData = jsonEncode(logs);
-      print(jsonData);
+      // print(jsonData);
 
       // Make POST request to the API endpoint
       final response = await http.post(
@@ -72,7 +90,7 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
 
       // Check the response status
       if (response.statusCode == 200) {
-        print('Logs uploaded successfully');
+        // print('Logs uploaded successfully');
         // Clear scanLogs after successful upload
         setState(() {
           scanLogs = [];
@@ -121,8 +139,10 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
           );
         },
       );
-      print('Error uploading logs: $e');
+      // print('Error uploading logs: $e');
     }
+
+    fetchEmployeeCount();
   }
 
   void _showLogoutConfirmation(BuildContext context) {
@@ -183,6 +203,19 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
               children: [
                 Text('$_scanCount'), // Display scan log count
                 SizedBox(width: 5), // Add some spacing
+                if (_userId == "903") // Conditionally show the button
+                  IconButton(
+                    onPressed: () {
+                      // Navigate to the history page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ScannedLogsHistoryPage(),
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.history),
+                  ),
                 IconButton(
                   onPressed:
                       _uploadScanLogs, // Call _uploadScanLogs when pressed

@@ -65,10 +65,10 @@ class NoteRepository {
       final db = await _database();
       final count = Sqflite.firstIntValue(
           await db.rawQuery('SELECT COUNT(*) FROM $_usersTable'));
-      print("user count = " + count.toString());
+      // print("user count = " + count.toString());
       return count ?? 0;
     } catch (e) {
-      print('Error getting user count: $e');
+      // print('Error getting user count: $e');
       return 0;
     }
   }
@@ -111,6 +111,34 @@ class NoteRepository {
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+  }
+
+  static Future<void> deleteArchiveLogs(String? dateScanned) async {
+    final db = await _database();
+    // print("DateScanned:  $dateScanned");
+    await db.rawQuery(
+      'delete FROM scan_logs WHERE logs_date = ? AND status_remarks = "uploaded"',
+      [dateScanned],
+    );
+
+    // DateTime now = DateTime.now();
+    // String formattedDate = DateTime.now().toString().split(' ')[0];
+    // String formattedTime = "${now.hour}:${now.minute}";
+
+    // await db.insert(
+    //   _tblScanLogs,
+    //   {
+    //     'event_id': eventId,
+    //     'Employeeid': employeeId,
+    //     'logs_date': formattedDate,
+    //     'logs_time': formattedTime,
+    //     'timestamp': now.toString(),
+    //     'remarks': remarks,
+    //     'user_id': user_id,
+    //     'status_remarks': "active"
+    //   },
+    //   conflictAlgorithm: ConflictAlgorithm.replace,
+    // );
   }
 
   static Future<List<Map<String, dynamic>>> getAllScanLogs() async {
@@ -174,7 +202,7 @@ where status_remarks = 'active'
 
       return logs.isNotEmpty; // Return true if logs are found, false otherwise
     } catch (e) {
-      print('Error checking scan logs: $e');
+      // print('Error checking scan logs: $e');
       return false; // Return false in case of an error
     }
   }
@@ -191,7 +219,7 @@ where status_remarks = 'active'
           await db.rawQuery('SELECT COUNT(*) FROM $_tblemployees'));
       return count ?? 0;
     } catch (e) {
-      print('Error getting employee count: $e');
+      // print('Error getting employee count: $e');
       return 0;
     }
   }
@@ -199,11 +227,11 @@ where status_remarks = 'active'
   static Future<int> getScanLogsCount() async {
     try {
       final db = await _database();
-      final count = Sqflite.firstIntValue(
-          await db.rawQuery('SELECT COUNT(*) FROM $_tblScanLogs'));
+      final count = Sqflite.firstIntValue(await db.rawQuery(
+          'SELECT COUNT(*) FROM $_tblScanLogs where status_remarks = "active"'));
       return count ?? 0;
     } catch (e) {
-      print('Error getting scan count: $e');
+      // print('Error getting scan count: $e');
       return 0;
     }
   }
@@ -211,18 +239,19 @@ where status_remarks = 'active'
   static Future<bool> undoScanLog(
       String employeeId, String eventId, String Remarks) async {
     try {
+      String formattedDate = DateTime.now().toString().split(' ')[0];
       final db = await _database();
       // Delete the scan log based on employeeId and eventId
       int rowsAffected = await db.delete(
         _tblScanLogs,
-        where: 'Employeeid = ? AND event_id = ? and remarks = ?',
-        whereArgs: [employeeId, eventId, Remarks],
+        where: 'Employeeid = ? AND logs_date = ? and remarks = ?',
+        whereArgs: [employeeId, formattedDate, Remarks],
       );
 
       // Check if any rows were affected (scan log deleted)
       return rowsAffected > 0;
     } catch (e) {
-      print('Error undoing scan log: $e');
+      // print('Error undoing scan log: $e');
       return false; // Return false in case of an error
     }
   }
@@ -235,7 +264,7 @@ where status_remarks = 'active'
           [searchKeyword, '%$searchKeyword%', '%$searchKeyword%']));
       return count != null && count > 0;
     } catch (e) {
-      print('Error checking employee existence: $e');
+      // print('Error checking employee existence: $e');
       return false;
     }
   }
@@ -263,7 +292,7 @@ where status_remarks = 'active'
         );
       });
     } catch (e) {
-      print('Error searching employees: $e');
+      // print('Error searching employees: $e');
       return []; // Return an empty list if there's an error
     }
   }
