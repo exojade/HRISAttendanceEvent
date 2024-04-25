@@ -48,7 +48,8 @@ class NoteRepository {
             logs_time TEXT,
             timestamp TEXT,
             remarks TEXT,
-            user_id TEXT
+            user_id TEXT,
+            status_remarks TEXT
           )
           ''');
     }, version: 1);
@@ -106,6 +107,7 @@ class NoteRepository {
         'timestamp': now.toString(),
         'remarks': remarks,
         'user_id': user_id,
+        'status_remarks': "active"
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -125,19 +127,49 @@ FROM scan_logs
 LEFT JOIN tblemployees e ON e.Employeeid = scan_logs.Employeeid
 LEFT JOIN events ON events.event_id = scan_logs.event_id
 LEFT JOIN users u on u.user_id = scan_logs.user_id
+where status_remarks = 'active'
 ;
     ''');
     return res;
   }
 
+  static Future<List<Map<String, dynamic>>> getHistoryScanLogs() async {
+    final db = await _database();
+    var res = await db.rawQuery('''
+          SELECT scan_logs.Employeeid, e.FirstName || ' ' || e.LastName AS fullname, 
+          u.fullname as scanner_fullname, 
+          e.Department,
+          events.event_name, 
+          scan_logs.logs_date AS date,
+          scan_logs.logs_time as time,
+          scan_logs.remarks
+    FROM scan_logs
+    LEFT JOIN tblemployees e ON e.Employeeid = scan_logs.Employeeid
+    LEFT JOIN events ON events.event_id = scan_logs.event_id
+    LEFT JOIN users u on u.user_id = scan_logs.user_id
+    where status_remarks = 'uploaded'
+    ;
+    ''');
+    return res;
+  }
+
+  static Future<void> archiveScanLogs() async {
+    final db = await _database();
+    await db.rawQuery('''
+  UPDATE scan_logs set status_remarks = 'uploaded' where status_remarks = 'active';
+    ''');
+  }
+
   static Future<bool> checkScanLog(
       String employeeId, String eventId, String remarks) async {
     try {
+      // DateTime now = DateTime.now();
+      String formattedDate = DateTime.now().toString().split(' ')[0];
       final db = await _database();
       final List<Map<String, dynamic>> logs = await db.rawQuery(
         'SELECT * FROM scan_logs '
-        'WHERE Employeeid = ? AND event_id = ? AND remarks = ?',
-        [employeeId, eventId, remarks],
+        'WHERE Employeeid = ? AND logs_date = ? AND remarks = ?',
+        [employeeId, formattedDate, remarks],
       );
 
       return logs.isNotEmpty; // Return true if logs are found, false otherwise

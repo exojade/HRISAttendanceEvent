@@ -79,7 +79,7 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
         });
 
         // Delete scan_logs data from SQLite
-        await NoteRepository.deleteScanLogs();
+        await NoteRepository.archiveScanLogs();
       } else {
         showDialog(
           context: context,
