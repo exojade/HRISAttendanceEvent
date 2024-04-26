@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:diary_app/repository/notes_repository.dart';
 import 'package:diary_app/screens/home/ScannedLogsHistoryPage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import '../../layouts/bottom_nav_bar.dart';
 import 'package:diary_app/models/users.dart';
 import 'package:http/http.dart' as http;
@@ -109,46 +110,54 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
         // Delete scan_logs data from SQLite
         await NoteRepository.archiveScanLogs();
       } else {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Error'),
-              content: Text(
-                  'Failed to upload logs. Status code: ${response.statusCode}'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context); // Close the dialog
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
+        // showDialog(
+        //   context: context,
+        //   builder: (BuildContext context) {
+        //     return AlertDialog(
+        //       title: Text('Error'),
+        //       content: Text(
+        //           'Failed to upload logs. Status code: ${response.statusCode}'),
+        //       actions: [
+        //         TextButton(
+        //           onPressed: () {
+        //             Navigator.pop(context); // Close the dialog
+        //           },
+        //           child: Text('OK'),
+        //         ),
+        //       ],
+        //     );
+        //   },
+        // );
       }
     } catch (e) {
       // Close the loading dialog
-      Navigator.pop(context);
+      // Navigator.pop(context);
 
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Error'),
-            content: Text('Failed to upload logs. Status code: $e'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // Close the dialog
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
-        },
+      Fluttertoast.showToast(
+        msg: 'Failed to upload logs. Status code: $e',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
       );
+
+      // showDialog(
+      //   context: context,
+      //   builder: (BuildContext context) {
+      //     return AlertDialog(
+      //       title: Text('Error'),
+      //       content: Text('Failed to upload logs. Status code: $e'),
+      //       actions: [
+      //         TextButton(
+      //           onPressed: () {
+      //             Navigator.pop(context); // Close the dialog
+      //           },
+      //           child: Text('OK'),
+      //         ),
+      //       ],
+      //     );
+      //   },
+      // );
       // print('Error uploading logs: $e');
     }
 
