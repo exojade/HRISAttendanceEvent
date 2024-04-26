@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../repository/notes_repository.dart'; // Import your repository
 import 'package:diary_app/models/scan_logs.dart'; // Import the ScanLogs model
 import 'package:intl/intl.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -15,6 +16,7 @@ class _ScannedLogsHistoryPageState extends State<ScannedLogsHistoryPage> {
 
   List<String> _uniqueDates = [];
   String? _selectedDate;
+  bool _isDownloading = false;
 
   @override
   void initState() {
@@ -69,15 +71,18 @@ class _ScannedLogsHistoryPageState extends State<ScannedLogsHistoryPage> {
   }
 
   void _uploadLogs(List<Map<String, dynamic>> logs) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Center(
-          child: CircularProgressIndicator(),
-        );
-      },
-    );
+    // showDialog(
+    //   context: context,
+    //   barrierDismissible: false,
+    //   builder: (BuildContext context) {
+    //     return Center(
+    //       child: CircularProgressIndicator(),
+    //     );
+    //   },
+    // );
+    setState(() {
+      _isDownloading = true; // Set downloading flag to true
+    });
 
     try {
       // Convert logs data to JSON format
@@ -94,72 +99,73 @@ class _ScannedLogsHistoryPageState extends State<ScannedLogsHistoryPage> {
       );
 
       // Close the loading dialog
-      Navigator.pop(context);
+      // Navigator.pop(context);
 
       // Check the response status
+      setState(() {
+        _isDownloading = false; // Set downloading flag to true
+      });
       if (response.statusCode == 200) {
+        _fetchScannedLogs();
         // print('Logs uploaded successfully');
         // Display success message
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Success'),
-              content: Text('Logs uploaded successfully'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context); // Close the dialog
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
+        // showDialog(
+        //   context: context,
+        //   builder: (BuildContext context) {
+        //     return AlertDialog(
+        //       title: Text('Success'),
+        //       content: Text('Logs uploaded successfully'),
+        //       actions: [
+        //         TextButton(
+        //           onPressed: () {
+        //             Navigator.pop(context); // Close the dialog
+        //           },
+        //           child: Text('OK'),
+        //         ),
+        //       ],
+        //     );
+        //   },
+        // );
       } else {
-        // Display error message
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Error'),
-              content: Text(
-                  'Failed to upload logs. Status code: ${response.statusCode}'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context); // Close the dialog
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
+        Fluttertoast.showToast(
+          msg: 'Failed to upload logs. Status code: ${response.statusCode}',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
         );
+        _fetchScannedLogs();
+
+        // Display error message
+        // showDialog(
+        //   context: context,
+        //   builder: (BuildContext context) {
+        //     return AlertDialog(
+        //       title: Text('Error'),
+        //       content: Text(
+        //           'Failed to upload logs. Status code: ${response.statusCode}'),
+        //       actions: [
+        //         TextButton(
+        //           onPressed: () {
+        //             Navigator.pop(context); // Close the dialog
+        //           },
+        //           child: Text('OK'),
+        //         ),
+        //       ],
+        //     );
+        //   },
+        // );
       }
     } catch (e) {
       // Close the loading dialog
-      Navigator.pop(context);
-
-      // Display error message
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Error'),
-            content: Text('Failed to upload logs: $e'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // Close the dialog
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
-        },
+      Fluttertoast.showToast(
+        msg: 'Failed to upload logs. Status code: $e',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
       );
+      _fetchScannedLogs();
       // print('Error uploading logs: $e');
     }
   }
@@ -171,9 +177,9 @@ class _ScannedLogsHistoryPageState extends State<ScannedLogsHistoryPage> {
         title: Text('Scanned Logs History'),
         centerTitle: true,
       ),
-      body: _scannedLogs.isEmpty
+      body: _isDownloading
           ? Center(
-              child: Text('No scanned logs available'),
+              child: CircularProgressIndicator(),
             )
           : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
