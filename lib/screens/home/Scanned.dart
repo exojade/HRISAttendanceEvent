@@ -253,18 +253,18 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
           );
         },
       ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: 2,
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacementNamed(context, '/home');
-          } else if (index == 1) {
-            Navigator.pushReplacementNamed(context, '/employees');
-          } else if (index == 3) {
-            _showLogoutConfirmation(context);
-          }
-        },
-      ),
+      // bottomNavigationBar: BottomNavBar(
+      //   currentIndex: 2,
+      //   onTap: (index) {
+      //     if (index == 0) {
+      //       Navigator.pushReplacementNamed(context, '/home');
+      //     } else if (index == 1) {
+      //       Navigator.pushReplacementNamed(context, '/employees');
+      //     } else if (index == 3) {
+      //       _showLogoutConfirmation(context);
+      //     }
+      //   },
+      // ),
     );
   }
 }

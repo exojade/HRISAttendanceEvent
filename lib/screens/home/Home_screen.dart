@@ -343,23 +343,23 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: 0, // Set the initial index of the bottom navigation bar
-        onTap: (index) {
-          if (index == 1) {
-            Navigator.pushReplacementNamed(
-                context, '/employees'); // Navigate to EmployeesScreen
-          } else if (index == 2) {
-            Navigator.pushReplacementNamed(
-                context, '/scan_logs'); // Navigate to ScannedLogsScreen
-          } else if (index == 3) {
-            _showLogoutConfirmation(context);
-            // Navigate to ScannedLogsScreen
-          } else {
-            // Handle other cases as needed
-          }
-        },
-      ),
+      // bottomNavigationBar: BottomNavBar(
+      //   currentIndex: 0, // Set the initial index of the bottom navigation bar
+      //   onTap: (index) {
+      //     if (index == 1) {
+      //       Navigator.pushReplacementNamed(
+      //           context, '/employees'); // Navigate to EmployeesScreen
+      //     } else if (index == 2) {
+      //       Navigator.pushReplacementNamed(
+      //           context, '/scan_logs'); // Navigate to ScannedLogsScreen
+      //     } else if (index == 3) {
+      //       _showLogoutConfirmation(context);
+      //       // Navigate to ScannedLogsScreen
+      //     } else {
+      //       // Handle other cases as needed
+      //     }
+      //   },
+      // ),
     );
   }
 }

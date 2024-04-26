@@ -33,8 +33,8 @@ class BottomNavBar extends StatelessWidget {
           label: 'Scan Logs',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.logout), // Add logout button
-          label: 'Logout',
+          icon: Icon(Icons.person), // Add logout button
+          label: 'Profile',
         ),
       ],
     );

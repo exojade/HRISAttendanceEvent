@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:diary_app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -8,7 +9,10 @@ import '../../repository/notes_repository.dart'; // Import your repository
 import '../home/Home_screen.dart'; // Import your HomeScreen
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  final Function()
+      onLoginSuccess; // Callback function to execute on successful login
+
+  const LoginScreen({Key? key, required this.onLoginSuccess}) : super(key: key);
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -54,7 +58,8 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     if (isAuthenticated) {
-      onLoginSuccess(); // Call the success handler
+      widget.onLoginSuccess();
+      // onLoginSuccess(); // Call the success handler
     } else {
       // showDialog(
       //   context: context,
@@ -128,12 +133,12 @@ class _LoginScreenState extends State<LoginScreen> {
     return false; // Authentication failed
   }
 
-  void onLoginSuccess() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => HomeScreen()),
-    );
-  }
+  // void onLoginSuccess() {
+  //   Navigator.push(
+  //     context,
+  //     MaterialPageRoute(builder: (context) => HomeScreen()),
+  //   );
+  // }
 
   void showNoInternetToast() {
     // print("No Internet Connection");

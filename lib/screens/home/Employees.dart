@@ -240,10 +240,10 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
                 );
               },
             ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: _onNavBarItemTapped,
-      ),
+      // bottomNavigationBar: BottomNavBar(
+      //   currentIndex: _currentIndex,
+      //   onTap: _onNavBarItemTapped,
+      // ),
     );
   }
 }
