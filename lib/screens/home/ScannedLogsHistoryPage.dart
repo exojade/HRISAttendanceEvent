@@ -107,6 +107,14 @@ class _ScannedLogsHistoryPageState extends State<ScannedLogsHistoryPage> {
       });
       if (response.statusCode == 200) {
         _fetchScannedLogs();
+
+        Fluttertoast.showToast(
+          msg: 'DONE UPLOAD',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+        );
         // print('Logs uploaded successfully');
         // Display success message
         // showDialog(
