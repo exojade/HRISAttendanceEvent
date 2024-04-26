@@ -17,6 +17,7 @@ class ScannedLogsScreen extends StatefulWidget {
 class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
   List<Map<String, dynamic>> scanLogs = [];
   int _scanCount = 0;
+  bool _isDownloading = false;
 
   String? _userId;
 
@@ -60,17 +61,21 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
   }
 
   void _uploadScanLogs() async {
-    showDialog(
-      context: context,
-      barrierDismissible: false, // Prevent closing dialog on outside tap
-      builder: (BuildContext context) {
-        return Center(
-          child: CircularProgressIndicator(), // Show loading indicator
-        );
-      },
-    );
+    // showDialog(
+    //   context: context,
+    //   barrierDismissible: false, // Prevent closing dialog on outside tap
+    //   builder: (BuildContext context) {
+    //     return Center(
+    //       child: CircularProgressIndicator(), // Show loading indicator
+    //     );
+    //   },
+    // );
 
     try {
+      setState(() {
+        _isDownloading = true; // Set downloading flag to true
+      });
+
       // Convert scanLogs data to JSON format
       List<Map<String, dynamic>> logs = scanLogs;
       String jsonData = jsonEncode(logs);
@@ -86,9 +91,14 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
       );
 
       // Close the loading dialog
-      Navigator.pop(context);
+      // Navigator.pop(context);
 
       // Check the response status
+
+      setState(() {
+        _isDownloading = false; // Set downloading flag to true
+      });
+
       if (response.statusCode == 200) {
         // print('Logs uploaded successfully');
         // Clear scanLogs after successful upload
@@ -145,37 +155,37 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
     fetchEmployeeCount();
   }
 
-  void _showLogoutConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirm Logout'),
-          content: Text('Are you sure you want to logout?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-                _logout();
-              },
-              child: Text('Logout'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // void _showLogoutConfirmation(BuildContext context) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: Text('Confirm Logout'),
+  //         content: Text('Are you sure you want to logout?'),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.pop(context); // Close the dialog
+  //             },
+  //             child: Text('Cancel'),
+  //           ),
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.pop(context); // Close the dialog
+  //               // _logout();
+  //             },
+  //             child: Text('Logout'),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
-  void _logout() async {
-    await NoteRepository.deleteUsers();
-    Navigator.pushReplacementNamed(context, '/');
-  }
+  // void _logout() async {
+  //   await NoteRepository.deleteUsers();
+  //   Navigator.pushReplacementNamed(context, '/');
+  // }
 
   String convertTo12HourFormat(String time24Hour) {
     // Parse the input time string
@@ -231,28 +241,34 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
         ),
         centerTitle: true,
       ),
-      body: ListView.builder(
-        itemCount: scanLogs.length,
-        itemBuilder: (context, index) {
-          final log = scanLogs[index];
-          return Card(
-            child: ListTile(
-              title: Text(
-                  log['fullname'] + "(" + log["Department"] + ")" ?? 'Unknown'),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Event: ${log['event_name'] ?? 'Unknown'}'),
-                  Text(
-                      'Date: ${log['date'] + " " + convertTo12HourFormat(log["time"]) ?? 'Unknown'}'),
-                  Text('Remarks: ${log['remarks'] ?? 'Unknown'}'),
-                  Text('Scanned By: ${log['scanner_fullname'] ?? 'Unknown'}'),
-                ],
-              ),
+      body: _isDownloading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : ListView.builder(
+              itemCount: scanLogs.length,
+              itemBuilder: (context, index) {
+                final log = scanLogs[index];
+                return Card(
+                  child: ListTile(
+                    title: Text(
+                        log['fullname'] + "(" + log["Department"] + ")" ??
+                            'Unknown'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Event: ${log['event_name'] ?? 'Unknown'}'),
+                        Text(
+                            'Date: ${log['date'] + " " + convertTo12HourFormat(log["time"]) ?? 'Unknown'}'),
+                        Text('Remarks: ${log['remarks'] ?? 'Unknown'}'),
+                        Text(
+                            'Scanned By: ${log['scanner_fullname'] ?? 'Unknown'}'),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
       // bottomNavigationBar: BottomNavBar(
       //   currentIndex: 2,
       //   onTap: (index) {

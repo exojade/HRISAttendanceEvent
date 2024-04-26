@@ -31,45 +31,45 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
     });
   }
 
-  void _showLogoutConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirm Logout'),
-          content: Text('Are you sure you want to logout?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-                _logout();
-                // Perform logout actions here, such as clearing data
-                // and navigating back to the login screen
-              },
-              child: Text('Logout'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  // void _showLogoutConfirmation(BuildContext context) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: Text('Confirm Logout'),
+  //         content: Text('Are you sure you want to logout?'),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.pop(context); // Close the dialog
+  //             },
+  //             child: Text('Cancel'),
+  //           ),
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.pop(context); // Close the dialog
+  //               _logout();
+  //               // Perform logout actions here, such as clearing data
+  //               // and navigating back to the login screen
+  //             },
+  //             child: Text('Logout'),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
-  void _logout() async {
-    // Clear user-related data from SQLite
-    await NoteRepository.deleteUsers();
+  // void _logout() async {
+  //   // Clear user-related data from SQLite
+  //   await NoteRepository.deleteUsers();
 
-    // Clear other data as needed
-    // await NoteRepository.deleteOtherData();
+  //   // Clear other data as needed
+  //   // await NoteRepository.deleteOtherData();
 
-    // Navigate back to login screen
-    Navigator.pushReplacementNamed(context, '/');
-  }
+  //   // Navigate back to login screen
+  //   Navigator.pushReplacementNamed(context, '/');
+  // }
 
   Future<void> fetchDataAndSync() async {
     try {
@@ -126,55 +126,56 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
     }
   }
 
-  void _onNavBarItemTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-      switch (_currentIndex) {
-        case 0:
-          Navigator.pushReplacementNamed(context, '/home');
-          break;
-        case 1:
-          // Do nothing, already on EmployeesScreen
-          break;
-        case 2:
-          Navigator.pushReplacementNamed(context, '/scan_logs');
-          break;
-        case 3:
-          _showLogoutConfirmation(context);
-          break;
+  // void _onNavBarItemTapped(int index) {
+  //   setState(() {
+  //     _currentIndex = index;
+  //     switch (_currentIndex) {
+  //       case 0:
+  //         Navigator.pushReplacementNamed(context, '/home');
+  //         break;
+  //       case 1:
+  //         // Do nothing, already on EmployeesScreen
+  //         break;
+  //       case 2:
+  //         Navigator.pushReplacementNamed(context, '/scan_logs');
+  //         break;
+  //       case 3:
+  //         _showLogoutConfirmation(context);
+  //         break;
 
-        default:
-          break;
-      }
-    });
-  }
+  //       default:
+  //         break;
+  //     }
+  //   });
+  // }
 
   Future<void> downloadData() async {
-    showDialog(
-      context: context,
-      barrierDismissible: false, // Prevent dialog from closing on outside tap
-      builder: (BuildContext context) {
-        return Dialog(
-          child: Padding(
-            padding: EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 10),
-                Text("Downloading data..."),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    // Show the CircularProgressIndicator dialog
+    // showDialog(
+    //   context: context,
+    //   barrierDismissible: false, // Prevent dialog from closing on outside tap
+    //   builder: (BuildContext context) {
+    //     return Dialog(
+    //       child: Padding(
+    //         padding: EdgeInsets.all(20.0),
+    //         child: Column(
+    //           mainAxisSize: MainAxisSize.min,
+    //           children: [
+    //             CircularProgressIndicator(),
+    //             SizedBox(height: 10),
+    //             Text("Downloading data..."),
+    //           ],
+    //         ),
+    //       ),
+    //     );
+    //   },
+    // );
 
+    // Simulate the download process
     await fetchDataAndSync();
-    fetchEmployeeCount(); // Call your fetch data method
-
-    // Close the dialog when data is fetched
-    Navigator.of(context).pop();
+    fetchEmployeeCount();
+    // Dismiss the CircularProgressIndicator dialog
+    // Navigator.of(context).pop();
   }
 
   @override
