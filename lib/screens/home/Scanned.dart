@@ -110,6 +110,16 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
         // Delete scan_logs data from SQLite
         await NoteRepository.archiveScanLogs();
       } else {
+        Fluttertoast.showToast(
+          msg: '${response.statusCode}',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+        );
+        setState(() {
+          _isDownloading = false; // Set downloading flag to true
+        });
         // showDialog(
         //   context: context,
         //   builder: (BuildContext context) {
