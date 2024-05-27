@@ -83,8 +83,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     List<Employee> employees = await NoteRepository.getEmployees();
 
-    print('departments: $selectedDepartment');
-    print('keyword: $keyword');
+    // print('departments: $selectedDepartment');
+    // print('keyword: $keyword');
 
     if (selectedDepartment != "All" && keyword != '000000000000') {
       searchResults = employees.where((emp) {
@@ -97,12 +97,12 @@ class _HomeScreenState extends State<HomeScreen> {
         String keywordLower = keyword.toLowerCase();
         String Department = '${emp.department}';
 
-        return fullName
-                .contains(keywordLower) || // Search by firstName + lastName
-            reversedFullName
-                .contains(keywordLower) || // Search by lastName + firstName
-            Fingerid == keywordLower &&
-                Department == selectedDepartment; // Search by finger ID
+        return (fullName
+                    .contains(keywordLower) || // Search by firstName + lastName
+                reversedFullName
+                    .contains(keywordLower) || // Search by lastName + firstName
+                Fingerid == keywordLower) &&
+            Department == selectedDepartment; // Search by finger ID
       }).toList();
     } else if (selectedDepartment != "All" && keyword == "000000000000") {
       searchResults = employees.where((emp) {
@@ -301,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Event: $currentEvent', style: TextStyle(fontSize: 14)),
+            // Text('Event: $currentEvent', style: TextStyle(fontSize: 14)),
             DropdownButton<String>(
               value: selectedDepartment,
               onChanged: (String? newValue) {
@@ -317,19 +317,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               }).toList(),
             ),
-            Expanded(
-              child: TextField(
-                controller: searchController,
-                onChanged: (value) {
-                  // Call the search function here passing the updated value
-                  searchEmployee();
-                },
-                decoration: InputDecoration(
-                  hintText: 'Search by Finger ID, First Name, or Last Name',
-                ),
+
+            TextField(
+              controller: searchController,
+              onChanged: (value) {
+                // Call the search function here passing the updated value
+                searchEmployee();
+              },
+              decoration: InputDecoration(
+                hintText: 'Search by Finger ID, First Name, or Last Name',
               ),
             ),
-            // SizedBox(height: 10),
+
             ElevatedButton(
               onPressed: () {
                 setState(() {
