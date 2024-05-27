@@ -44,6 +44,7 @@ dependencies:
   http: ^0.13.3
   connectivity_plus: any
   fluttertoast: ^8.0.8
+  url_launcher: 6.2.6 
 
   # fluttertoast: any
 dev_dependencies:

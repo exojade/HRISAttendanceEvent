@@ -4,10 +4,16 @@ import 'package:diary_app/models/users.dart';
 import 'package:diary_app/models/version.dart';
 import '../../repository/notes_repository.dart';
 import 'package:intl/intl.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 // import 'models/users.dart'; // Import your User model
 String version_string = '';
+
+bool _isLoading = false;
+bool _isConnected = true;
 
 class ProfilePage extends StatefulWidget {
   final VoidCallback logoutCallback;
@@ -23,6 +29,14 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     fetchVersion(); // Fetch the current event when the screen initializes
+    checkConnectivity();
+  }
+
+  Future<void> checkConnectivity() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    setState(() {
+      _isConnected = connectivityResult != ConnectivityResult.none;
+    });
   }
 
   Future<void> fetchVersion() async {
@@ -44,6 +58,145 @@ class _ProfilePageState extends State<ProfilePage> {
     } catch (e) {
       print('Error fetching logged-in user: $e');
     }
+  }
+
+  Future<bool> checkForUpdates(String version) async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://203.177.88.234:7000/hris/checkUpdates'),
+        body: jsonEncode({
+          'versionBody': {'version': version},
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+      print(response.statusCode);
+      if (response.statusCode == 200) {
+        // print("sulod diri sa 200");
+        var data = jsonDecode(response.body);
+        print(data);
+        if (data['status'] == 'success' && data['responsive'].isNotEmpty) {
+          // print("tama credentials");
+          var responseData = data['responsive'];
+          print(responseData['google_link']);
+          _showUpdateDialog(responseData['google_link']);
+          if (responseData["responseStatus"] == 1) {
+            _showUpdateDialog(data['google_link']);
+          } else {
+            _showNoUpdateDialog();
+          }
+
+          return true; // Authentication successful
+        } else {
+          // print("mali credentials");
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text('Login Failed'),
+              content: Text('Invalid username or password.'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+      } else {
+        // showNoInternetToast();
+      }
+    } catch (e) {
+      // print('Error authenticating user: $e');
+      // showNoInternetToast();
+      // Handle internet connection error
+    }
+
+    return false; // Authentication failed
+  }
+
+  Future<void> _checker() async {
+    // if (!_isConnected) {
+    //   // Show a message or dialog indicating no internet connection
+    //   showNoInternetToast();
+    //   return;
+    // }
+
+    // setState(() {
+    //   _isLoading = true; // Set loading state to true
+    // });
+
+    bool isAuthenticated = await checkForUpdates(version_string);
+
+    setState(() {
+      _isLoading = false; // Set loading state back to false
+    });
+  }
+
+  void showNoInternetToast() {
+    // print("No Internet Connection");
+    Fluttertoast.showToast(
+      msg: 'No internet connection',
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+    );
+  }
+
+  void _showUpdateDialog(String downloadLink) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Update Available"),
+          content: Text(
+              "A new version of the app is available. Would you like to download it?"),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _launchURL(downloadLink);
+              },
+              child: Text("Download"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  void _showNoUpdateDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("No Updates"),
+          content: Text("Your app is up to date."),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -97,7 +250,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: Text('Logout'),
                       ),
                       ElevatedButton(
-                        onPressed: widget.logoutCallback,
+                        onPressed: _checker,
                         child: Text('Check Updates'),
                       ),
                     ],
