@@ -66,6 +66,16 @@ class NoteRepository {
     await _database();
   }
 
+  static Future<void> addVersionTable() async {
+    try {
+      final db = await _database();
+      db.execute(
+          'CREATE TABLE IF NOT EXISTS $_version(version TEXT PRIMARY KEY)');
+    } catch (e) {
+      // print('Error getting user count: $e');
+    }
+  }
+
   static Future<int> getUserCount() async {
     try {
       final db = await _database();
@@ -344,9 +354,9 @@ where status_remarks = 'active'
     }
   }
 
-  static Future<void> insertIntoVersion(String version) async {
+  static Future<void> insertIntoVersion(String version_string) async {
     final db = await _database();
-    String query = "INSERT INTO $_version (version) VALUES $version";
+    String query = "INSERT INTO $_version (version) VALUES ('$version_string')";
     await db.rawInsert(query);
   }
 

@@ -26,6 +26,8 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> fetchVersion() async {
+    await NoteRepository.addVersionTable();
+
     try {
       List<Version> version_table = await NoteRepository.getVersion();
       if (version_table.isNotEmpty) {
@@ -35,7 +37,9 @@ class _ProfilePageState extends State<ProfilePage> {
       } else {
         await NoteRepository.insertIntoVersion("1");
         version_table = await NoteRepository.getVersion();
-        version_string = version_table.first.version;
+        setState(() {
+          version_string = version_table.first.version;
+        });
       }
     } catch (e) {
       print('Error fetching logged-in user: $e');
@@ -84,9 +88,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        version_string,
+                        "App Version: " + version_string,
                         style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                            fontSize: 15, fontWeight: FontWeight.bold),
                       ),
                       ElevatedButton(
                         onPressed: widget.logoutCallback,
