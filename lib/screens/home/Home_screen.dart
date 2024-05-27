@@ -82,21 +82,50 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     List<Employee> employees = await NoteRepository.getEmployees();
-    searchResults = employees.where((emp) {
-      // Convert first name and last name to lowercase for case-insensitive comparison
-      String fullName = '${emp.firstName} ${emp.lastName}'.toLowerCase();
-      String Fingerid = '${emp.fingerId}'.toLowerCase();
-      // print(fullName);
-      String reversedFullName =
-          '${emp.lastName} ${emp.firstName}'.toLowerCase();
-      String keywordLower = keyword.toLowerCase();
 
-      return fullName
-              .contains(keywordLower) || // Search by firstName + lastName
-          reversedFullName
-              .contains(keywordLower) || // Search by lastName + firstName
-          Fingerid == keywordLower; // Search by finger ID
-    }).toList();
+    print('departments: $selectedDepartment');
+    print('keyword: $keyword');
+
+    if (selectedDepartment != "All" && keyword != '000000000000') {
+      searchResults = employees.where((emp) {
+        // Convert first name and last name to lowercase for case-insensitive comparison
+        String fullName = '${emp.firstName} ${emp.lastName}'.toLowerCase();
+        String Fingerid = '${emp.fingerId}'.toLowerCase();
+        // print(fullName);
+        String reversedFullName =
+            '${emp.lastName} ${emp.firstName}'.toLowerCase();
+        String keywordLower = keyword.toLowerCase();
+        String Department = '${emp.department}';
+
+        return fullName
+                .contains(keywordLower) || // Search by firstName + lastName
+            reversedFullName
+                .contains(keywordLower) || // Search by lastName + firstName
+            Fingerid == keywordLower &&
+                Department == selectedDepartment; // Search by finger ID
+      }).toList();
+    } else if (selectedDepartment != "All" && keyword == "000000000000") {
+      searchResults = employees.where((emp) {
+        String Department = '${emp.department}';
+        return Department == selectedDepartment; // Search by finger ID
+      }).toList();
+    } else {
+      searchResults = employees.where((emp) {
+        // Convert first name and last name to lowercase for case-insensitive comparison
+        String fullName = '${emp.firstName} ${emp.lastName}'.toLowerCase();
+        String Fingerid = '${emp.fingerId}'.toLowerCase();
+        // print(fullName);
+        String reversedFullName =
+            '${emp.lastName} ${emp.firstName}'.toLowerCase();
+        String keywordLower = keyword.toLowerCase();
+
+        return fullName
+                .contains(keywordLower) || // Search by firstName + lastName
+            reversedFullName
+                .contains(keywordLower) || // Search by lastName + firstName
+            Fingerid == keywordLower; // Search by finger ID
+      }).toList();
+    }
 
     // Check if employee has already scanned for the current event
     await checkScanLogs(searchResults);
@@ -205,7 +234,7 @@ class _HomeScreenState extends State<HomeScreen> {
           eventId, employeeId, remarks, loggedInUserId);
       // Refresh search results
       searchEmployee();
-      searchEmployeeDepartment();
+      // searchEmployeeDepartment();
     }
   }
 
@@ -293,7 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onChanged: (String? newValue) {
                     setState(() {
                       selectedDepartment = newValue!;
-                      searchEmployeeDepartment();
+                      searchEmployee();
                     });
                   },
                   items:
