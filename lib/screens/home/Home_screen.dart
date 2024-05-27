@@ -302,40 +302,34 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text('Event: $currentEvent', style: TextStyle(fontSize: 14)),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: searchController,
-                    onChanged: (value) {
-                      // Call the search function here passing the updated value
-                      searchEmployee();
-                    },
-                    decoration: InputDecoration(
-                      hintText: 'Search by Finger ID, First Name, or Last Name',
-                    ),
-                  ),
-                ),
-                SizedBox(width: 10),
-                DropdownButton<String>(
-                  value: selectedDepartment,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      selectedDepartment = newValue!;
-                      searchEmployee();
-                    });
-                  },
-                  items:
-                      departments.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
-              ],
+            DropdownButton<String>(
+              value: selectedDepartment,
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedDepartment = newValue!;
+                  searchEmployee();
+                });
+              },
+              items: departments.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
             ),
-            SizedBox(height: 10),
+            Expanded(
+              child: TextField(
+                controller: searchController,
+                onChanged: (value) {
+                  // Call the search function here passing the updated value
+                  searchEmployee();
+                },
+                decoration: InputDecoration(
+                  hintText: 'Search by Finger ID, First Name, or Last Name',
+                ),
+              ),
+            ),
+            // SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
                 setState(() {
@@ -346,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               child: Text('Clear'),
             ),
-            SizedBox(height: 20),
+            // SizedBox(height: 20),
             if (searchResults.isNotEmpty)
               Expanded(
                 child: ListView.builder(
