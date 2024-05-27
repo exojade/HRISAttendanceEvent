@@ -205,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
           eventId, employeeId, remarks, loggedInUserId);
       // Refresh search results
       searchEmployee();
-      // searchEmployeeDepartment();
+      searchEmployeeDepartment();
     }
   }
 
