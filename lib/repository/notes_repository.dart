@@ -344,14 +344,11 @@ where status_remarks = 'active'
     }
   }
 
-
-    static Future<void> insertIntoVersion(String version) async {
+  static Future<void> insertIntoVersion(String version) async {
     final db = await _database();
-    String query =
-        "INSERT INTO $_version (version) VALUES $version";
+    String query = "INSERT INTO $_version (version) VALUES $version";
     await db.rawInsert(query);
   }
-
 
   static Future<void> insertToEmployees(
       List<Map<String, dynamic>> employees) async {
@@ -430,10 +427,7 @@ where status_remarks = 'active'
     final db = await _database();
     final List<Map<String, dynamic>> versionMaps = await db.query('version');
     return List.generate(versionMaps.length, (i) {
-
-      return Version(version: versionMaps[i]['version'])
-
-    
+      return Version(version: versionMaps[i]['version']);
     });
   }
 
