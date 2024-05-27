@@ -127,6 +127,16 @@ class _HomeScreenState extends State<HomeScreen> {
       }).toList();
     }
 
+    searchResults.sort((a, b) {
+      int lastNameComparison =
+          a.lastName.toLowerCase().compareTo(b.lastName.toLowerCase());
+      if (lastNameComparison != 0) {
+        return lastNameComparison;
+      } else {
+        return a.firstName.toLowerCase().compareTo(b.firstName.toLowerCase());
+      }
+    });
+
     // Check if employee has already scanned for the current event
     await checkScanLogs(searchResults);
 
@@ -353,7 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Card(
                         child: ListTile(
                           title: Text(
-                              '${employee.firstName} ${employee.lastName}'),
+                              '${employee.lastName}, ${employee.firstName}'),
                           subtitle: Text(
                               '(${employee.department}) ID: ${employee.fingerId}'),
                           trailing: Row(
