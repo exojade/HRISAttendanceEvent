@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:diary_app/models/users.dart';
+import 'package:diary_app/models/version.dart';
 import '../../repository/notes_repository.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+
 // import 'models/users.dart'; // Import your User model
+String version_string = '';
 
 class ProfilePage extends StatefulWidget {
   final VoidCallback logoutCallback;
@@ -17,6 +20,28 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   @override
+  void initState() {
+    super.initState();
+    fetchVersion(); // Fetch the current event when the screen initializes
+  }
+
+  Future<void> fetchVersion() async {
+    try {
+      List<Version> version_table = await NoteRepository.getVersion();
+      if (version_table.isNotEmpty) {
+        setState(() {
+          version_string = version_table.first.version;
+        });
+      } else {
+        await NoteRepository.insertIntoVersion("1");
+        version_table = await NoteRepository.getVersion();
+        version_string = version_table.first.version;
+      }
+    } catch (e) {
+      print('Error fetching logged-in user: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,9 +83,18 @@ class _ProfilePageState extends State<ProfilePage> {
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
+                      Text(
+                        version_string,
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
                       ElevatedButton(
                         onPressed: widget.logoutCallback,
                         child: Text('Logout'),
+                      ),
+                      ElevatedButton(
+                        onPressed: widget.logoutCallback,
+                        child: Text('Check Updates'),
                       ),
                     ],
                   );

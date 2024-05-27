@@ -5,6 +5,7 @@ import '../models/employee.dart';
 import '../models/events.dart';
 import '../models/scan_logs.dart';
 import '../models/users.dart';
+import '../models/version.dart';
 
 class NoteRepository {
   static const _dbName = 'hris.db';
@@ -12,6 +13,7 @@ class NoteRepository {
   static const _event = 'events';
   static const _tblScanLogs = 'scan_logs';
   static const _usersTable = 'users';
+  static const _version = 'version';
 
   static Future<Database> _database() async {
     final dbPath = await getDatabasesPath();
@@ -19,18 +21,18 @@ class NoteRepository {
         openDatabase(join(dbPath, _dbName), onCreate: (db, version) {
       // Create the employees table
       db.execute(
-          'CREATE TABLE $_tblemployees(Employeeid TEXT PRIMARY KEY, FirstName TEXT, LastName TEXT, Department TEXT, Fingerid TEXT)');
+          'CREATE TABLE IF NOT EXISTS $_tblemployees(Employeeid TEXT PRIMARY KEY, FirstName TEXT, LastName TEXT, Department TEXT, Fingerid TEXT)');
 
       // Create the events table
       db.execute('''
-          CREATE TABLE $_event (
+          CREATE TABLE IF NOT EXISTS $_event (
             event_id TEXT PRIMARY KEY,
             event_name TEXT
           )
           ''');
 
       db.execute('''
-          CREATE TABLE $_usersTable (
+          CREATE TABLE IF NOT EXISTS $_usersTable (
             user_id TEXT PRIMARY KEY,
             username TEXT,
             password TEXT,
@@ -52,7 +54,11 @@ class NoteRepository {
             status_remarks TEXT
           )
           ''');
+
+      db.execute(
+          'CREATE TABLE IF NOT EXISTS $_version(version TEXT PRIMARY KEY)');
     }, version: 1);
+
     return database;
   }
 
@@ -65,6 +71,19 @@ class NoteRepository {
       final db = await _database();
       final count = Sqflite.firstIntValue(
           await db.rawQuery('SELECT COUNT(*) FROM $_usersTable'));
+      // print("user count = " + count.toString());
+      return count ?? 0;
+    } catch (e) {
+      // print('Error getting user count: $e');
+      return 0;
+    }
+  }
+
+  static Future<int> getVersionCount() async {
+    try {
+      final db = await _database();
+      final count = Sqflite.firstIntValue(
+          await db.rawQuery('SELECT COUNT(*) FROM $_version'));
       // print("user count = " + count.toString());
       return count ?? 0;
     } catch (e) {
@@ -325,6 +344,15 @@ where status_remarks = 'active'
     }
   }
 
+
+    static Future<void> insertIntoVersion(String version) async {
+    final db = await _database();
+    String query =
+        "INSERT INTO $_version (version) VALUES $version";
+    await db.rawInsert(query);
+  }
+
+
   static Future<void> insertToEmployees(
       List<Map<String, dynamic>> employees) async {
     final db = await _database();
@@ -395,6 +423,17 @@ where status_remarks = 'active'
         username: userMaps[i]['username'],
         password: "",
       );
+    });
+  }
+
+  static Future<List<Version>> getVersion() async {
+    final db = await _database();
+    final List<Map<String, dynamic>> versionMaps = await db.query('version');
+    return List.generate(versionMaps.length, (i) {
+
+      return Version(version: versionMaps[i]['version'])
+
+    
     });
   }
 
