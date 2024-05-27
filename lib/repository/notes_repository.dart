@@ -89,6 +89,15 @@ class NoteRepository {
     return res;
   }
 
+  static Future<List<String>> getDistinctDepartments() async {
+    final db = await _database();
+    final result =
+        await db.rawQuery('SELECT DISTINCT Department FROM $_tblemployees');
+    List<String> departments =
+        result.map((row) => row['Department'] as String).toList();
+    return departments;
+  }
+
   static Future<void> insertScanLog(
       String eventId, String employeeId, String remarks, String user_id) async {
     final db = await _database();
@@ -139,6 +148,25 @@ class NoteRepository {
     //   },
     //   conflictAlgorithm: ConflictAlgorithm.replace,
     // );
+  }
+
+  static Future<List<Employee>> getEmployeesByDepartment(
+      String department) async {
+    final db = await _database();
+    final List<Map<String, dynamic>> maps = await db.query(
+      _tblemployees,
+      where: "Department = ?",
+      whereArgs: [department],
+    );
+    return List.generate(maps.length, (i) {
+      return Employee(
+        id: maps[i]['Employeeid'],
+        firstName: maps[i]['FirstName'],
+        lastName: maps[i]['LastName'],
+        department: maps[i]['Department'],
+        fingerId: maps[i]['Fingerid'],
+      );
+    });
   }
 
   static Future<List<Map<String, dynamic>>> getAllScanLogs() async {

@@ -20,6 +20,9 @@ class _HomeScreenState extends State<HomeScreen> {
   String currentEventid = '0';
   String loggedInUserName = '';
   String loggedInUserId = '';
+  String selectedDepartment = 'All'; // Default selected department
+  List<String> departments = ['All'];
+
   // Default value for the current event
 
   @override
@@ -27,6 +30,19 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     fetchCurrentEvent(); // Fetch the current event when the screen initializes
     fetchLoggedInUser();
+    fetchDepartments();
+  }
+
+  Future<void> fetchDepartments() async {
+    try {
+      List<String> fetchedDepartments =
+          await NoteRepository.getDistinctDepartments();
+      setState(() {
+        departments = ['All'] + fetchedDepartments; // Add 'All' to the list
+      });
+    } catch (e) {
+      print('Error fetching departments: $e');
+    }
   }
 
   Future<void> fetchLoggedInUser() async {
@@ -90,6 +106,22 @@ class _HomeScreenState extends State<HomeScreen> {
       // searchController.clear();
       // FocusScope.of(context).requestFocus(FocusNode());
     });
+  }
+
+  Future<void> searchEmployeeDepartment() async {
+    if (selectedDepartment == 'All') {
+      searchEmployee();
+      return;
+    }
+
+    List<Employee> employees =
+        await NoteRepository.getEmployeesByDepartment(selectedDepartment);
+    searchResults = employees;
+
+    // Check if employee has already scanned for the current event
+    await checkScanLogs(searchResults);
+
+    setState(() {});
   }
 
   Future<void> checkScanLogs(List<Employee> employees) async {
@@ -173,6 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
           eventId, employeeId, remarks, loggedInUserId);
       // Refresh search results
       searchEmployee();
+      // searchEmployeeDepartment();
     }
   }
 
@@ -240,30 +273,45 @@ class _HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text('Event: $currentEvent', style: TextStyle(fontSize: 14)),
-            TextField(
-              controller: searchController,
-              onChanged: (value) {
-                // Call the search function here passing the updated value
-                searchEmployee();
-              },
-              decoration: InputDecoration(
-                hintText: 'Search by Finger ID, First Name, or Last Name',
-                // suffixIcon: IconButton(
-                //   icon: Icon(Icons.clear),
-                //   onPressed: () {
-                //     setState(() {
-                //       searchController.clear();
-                //       searchEmployee();
-                //     });
-                //   },
-                // ),
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: searchController,
+                    onChanged: (value) {
+                      // Call the search function here passing the updated value
+                      searchEmployee();
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Search by Finger ID, First Name, or Last Name',
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10),
+                DropdownButton<String>(
+                  value: selectedDepartment,
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedDepartment = newValue!;
+                      searchEmployeeDepartment();
+                    });
+                  },
+                  items:
+                      departments.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+              ],
             ),
             SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
                 setState(() {
                   searchController.clear();
+                  selectedDepartment = 'All';
                   searchEmployee();
                 });
               },
@@ -285,8 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           title: Text(
                               '${employee.firstName} ${employee.lastName}'),
                           subtitle: Text(
-                            '(${employee.department}) ID: ${employee.fingerId} ',
-                          ),
+                              '(${employee.department}) ID: ${employee.fingerId}'),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -343,23 +390,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      // bottomNavigationBar: BottomNavBar(
-      //   currentIndex: 0, // Set the initial index of the bottom navigation bar
-      //   onTap: (index) {
-      //     if (index == 1) {
-      //       Navigator.pushReplacementNamed(
-      //           context, '/employees'); // Navigate to EmployeesScreen
-      //     } else if (index == 2) {
-      //       Navigator.pushReplacementNamed(
-      //           context, '/scan_logs'); // Navigate to ScannedLogsScreen
-      //     } else if (index == 3) {
-      //       _showLogoutConfirmation(context);
-      //       // Navigate to ScannedLogsScreen
-      //     } else {
-      //       // Handle other cases as needed
-      //     }
-      //   },
-      // ),
     );
   }
 }
