@@ -30,6 +30,7 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     fetchVersion(); // Fetch the current event when the screen initializes
     checkConnectivity();
+    // _checker();
   }
 
   Future<void> checkConnectivity() async {
@@ -43,13 +44,14 @@ class _ProfilePageState extends State<ProfilePage> {
     await NoteRepository.addVersionTable();
 
     try {
+      await NoteRepository.updateVersion("1.8");
       List<Version> version_table = await NoteRepository.getVersion();
       if (version_table.isNotEmpty) {
         setState(() {
           version_string = version_table.first.version;
         });
       } else {
-        await NoteRepository.insertIntoVersion("1");
+        await NoteRepository.insertIntoVersion("1.8");
         version_table = await NoteRepository.getVersion();
         setState(() {
           version_string = version_table.first.version;
@@ -69,38 +71,27 @@ class _ProfilePageState extends State<ProfilePage> {
         }),
         headers: {'Content-Type': 'application/json'},
       );
-      print(response.statusCode);
+      // print(response.statusCode);
       if (response.statusCode == 200) {
         // print("sulod diri sa 200");
         var data = jsonDecode(response.body);
-        print(data);
-        if (data['status'] == 'success' && data['responsive'].isNotEmpty) {
-          // print("tama credentials");
+        if (data['status'] == 'success') {
           var responseData = data['responsive'];
-          print(responseData['google_link']);
-          _showUpdateDialog(responseData['google_link']);
+          print(responseData["responseStatus"]);
           if (responseData["responseStatus"] == 1) {
-            _showUpdateDialog(data['google_link']);
+            Uri _url = Uri.parse(responseData['google_link']);
+            // _showUpdateDialog(_url);
+            print(responseData["responseStatus"]);
+            _showUpdateDialog(_url);
           } else {
-            _showNoUpdateDialog();
+            print("way Udate");
+            _showNoUpdateDialogs();
           }
 
           return true; // Authentication successful
         } else {
           // print("mali credentials");
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text('Login Failed'),
-              content: Text('Invalid username or password.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('OK'),
-                ),
-              ],
-            ),
-          );
+          _showNoUpdateDialogs();
         }
       } else {
         // showNoInternetToast();
@@ -143,7 +134,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _showUpdateDialog(String downloadLink) {
+  void _showUpdateDialog(Uri downloadLink) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -171,27 +162,28 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _launchURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
+  Future<void> _launchURL(Uri url) async {
+    if (!await launchUrl(
+      url,
+      mode: LaunchMode.externalApplication,
+    )) {
+      throw Exception('Could not launch $url');
     }
   }
 
-  void _showNoUpdateDialog() {
+  void _showNoUpdateDialogs() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("No Updates"),
-          content: Text("Your app is up to date."),
+          title: Text("No Update Available"),
+          content: Text("This is latest!"),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text("OK"),
+              child: Text("Ok"),
             ),
           ],
         );

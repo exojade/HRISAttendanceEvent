@@ -360,6 +360,13 @@ where status_remarks = 'active'
     await db.rawInsert(query);
   }
 
+  static Future<void> updateVersion(String version_string) async {
+    final db = await _database();
+    // String query = "INSERT INTO $_version (version) VALUES ('$version_string')";
+    String query = "update $_version set version = '$version_string'";
+    await db.rawInsert(query);
+  }
+
   static Future<void> insertToEmployees(
       List<Map<String, dynamic>> employees) async {
     final db = await _database();
