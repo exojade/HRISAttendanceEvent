@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../repository/notes_repository.dart'; // Import your repository
 import 'package:diary_app/models/scan_logs.dart'; // Import the ScanLogs model
+import 'package:diary_app/models/serverUrl.dart'; // Import the ScanLogs model
 import 'package:intl/intl.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
@@ -17,11 +18,13 @@ class _ScannedLogsHistoryPageState extends State<ScannedLogsHistoryPage> {
   List<String> _uniqueDates = [];
   String? _selectedDate;
   bool _isDownloading = false;
+  String _serverUrl = "";
 
   @override
   void initState() {
     super.initState();
-    _fetchScannedLogs(); // Fetch scanned logs when the page initializes
+    _fetchScannedLogs();
+    fetchUrl(); // Fetch scanned logs when the page initializes
   }
 
   Future<void> _fetchScannedLogs() async {
@@ -36,6 +39,19 @@ class _ScannedLogsHistoryPageState extends State<ScannedLogsHistoryPage> {
     } catch (e) {
       // print('Error fetching scanned logs: $e');
       // Handle error fetching scanned logs
+    }
+  }
+
+  Future<void> fetchUrl() async {
+    try {
+      List<ServerUrl> serverUrl = await NoteRepository.getServerUrl();
+      if (serverUrl.isNotEmpty) {
+        setState(() {
+          _serverUrl = serverUrl.first.serverUrl;
+        });
+      }
+    } catch (e) {
+      // print('Error fetching user id: $e');
     }
   }
 
@@ -88,10 +104,11 @@ class _ScannedLogsHistoryPageState extends State<ScannedLogsHistoryPage> {
       // Convert logs data to JSON format
       String jsonData = jsonEncode(logs);
       // print(jsonData);
+      String theUrl = _serverUrl + '/hris/insertLogs';
 
       // Make POST request to the API endpoint
       final response = await http.post(
-        Uri.parse('http://203.177.88.234:7000/hris/insertLogs'),
+        Uri.parse(theUrl),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
