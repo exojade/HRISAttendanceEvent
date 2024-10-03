@@ -5,6 +5,7 @@ import 'package:diary_app/screens/home/ScannedLogsHistoryPage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../../layouts/bottom_nav_bar.dart';
 import 'package:diary_app/models/users.dart';
+import 'package:diary_app/models/serverUrl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -21,6 +22,7 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
   bool _isDownloading = false;
 
   String? _userId;
+  String? _serverUrl = "";
 
   @override
   void initState() {
@@ -28,6 +30,7 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
     fetchUserId();
     fetchScanLogs();
     fetchEmployeeCount();
+    fetchUrl();
   }
 
   Future<void> fetchUserId() async {
@@ -36,6 +39,19 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
       if (users.isNotEmpty) {
         setState(() {
           _userId = users.first.userId;
+        });
+      }
+    } catch (e) {
+      // print('Error fetching user id: $e');
+    }
+  }
+
+  Future<void> fetchUrl() async {
+    try {
+      List<ServerUrl> serverUrl = await NoteRepository.getServerUrl();
+      if (serverUrl.isNotEmpty) {
+        setState(() {
+          _serverUrl = serverUrl.first.serverUrl;
         });
       }
     } catch (e) {
@@ -83,8 +99,9 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
       // print(jsonData);
 
       // Make POST request to the API endpoint
+      String theUrl = _serverUrl.toString() + '/hris/insertLogs';
       final response = await http.post(
-        Uri.parse('http://203.177.88.234:7000/hris/insertLogs'),
+        Uri.parse(theUrl),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

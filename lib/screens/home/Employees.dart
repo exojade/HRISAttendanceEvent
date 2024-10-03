@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../../repository/notes_repository.dart';
 import 'package:diary_app/models/employee.dart';
+import 'package:diary_app/models/serverUrl.dart';
 import 'package:diary_app/models/events.dart'; // Import the Event model
 import '../../layouts/bottom_nav_bar.dart'; // Import the BottomNavBar widget
 
@@ -17,11 +18,13 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
   int _currentIndex = 1; // Index for EmployeesScreen
   bool _isDownloading = false; // Flag to track download state
   int _employeeCount = 0;
+  String _serverUrl = "";
 
   @override
   void initState() {
     super.initState();
-    fetchEmployeeCount(); // Fetch and update the employee count
+    fetchEmployeeCount();
+    fetchUrl(); // Fetch and update the employee count
   }
 
   Future<void> fetchEmployeeCount() async {
@@ -29,6 +32,20 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
     setState(() {
       _employeeCount = count;
     });
+  }
+
+  Future<void> fetchUrl() async {
+    try {
+      List<ServerUrl> serverUrl = await NoteRepository.getServerUrl();
+      if (serverUrl.isNotEmpty) {
+        setState(() {
+          _serverUrl = serverUrl.first.serverUrl;
+          print("the Server URL is " + _serverUrl);
+        });
+      }
+    } catch (e) {
+      // print('Error fetching user id: $e');
+    }
   }
 
   // void _showLogoutConfirmation(BuildContext context) {
@@ -77,10 +94,12 @@ class _EmployeesScreenState extends State<EmployeesScreen> {
         _isDownloading = true; // Set downloading flag to true
       });
 
-      final employeeResponse = await http
-          .get(Uri.parse('http://203.177.88.234:7000/hris/fetchEmployees'));
-      final eventResponse = await http
-          .get(Uri.parse('http://203.177.88.234:7000/hris/fetchEventActive'));
+      String theUrlFetchEmployees = _serverUrl + '/hris/fetchEmployees';
+      String theUrlFetchEventActive = _serverUrl + '/hris/fetchEventActive';
+
+      final employeeResponse = await http.get(Uri.parse(theUrlFetchEmployees));
+      // print(theUrl);
+      final eventResponse = await http.get(Uri.parse(theUrlFetchEventActive));
 
       if (employeeResponse.statusCode == 200 &&
           eventResponse.statusCode == 200) {

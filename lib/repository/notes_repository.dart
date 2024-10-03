@@ -6,10 +6,12 @@ import '../models/events.dart';
 import '../models/scan_logs.dart';
 import '../models/users.dart';
 import '../models/version.dart';
+import '../models/serverUrl.dart';
 
 class NoteRepository {
   static const _dbName = 'hris.db';
   static const _tblemployees = 'tblemployees';
+  static const _tblServer = 'tblServer';
   static const _event = 'events';
   static const _tblScanLogs = 'scan_logs';
   static const _usersTable = 'users';
@@ -22,6 +24,9 @@ class NoteRepository {
       // Create the employees table
       db.execute(
           'CREATE TABLE IF NOT EXISTS $_tblemployees(Employeeid TEXT PRIMARY KEY, FirstName TEXT, LastName TEXT, Department TEXT, Fingerid TEXT)');
+
+      db.execute(
+          'CREATE TABLE IF NOT EXISTS $_tblServer(serverUrl TEXT PRIMARY KEY)');
 
       // Create the events table
       db.execute('''
@@ -427,6 +432,15 @@ where status_remarks = 'active'
     );
   }
 
+  static Future<void> inserServerUrl(ServerUrl serverUrl) async {
+    final db = await _database();
+    await db.insert(
+      _tblServer,
+      serverUrl.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   static Future<List<User>> getUsers() async {
     final db = await _database();
     final List<Map<String, dynamic>> userMaps = await db.query('users');
@@ -436,6 +450,16 @@ where status_remarks = 'active'
         fullname: userMaps[i]['fullname'],
         username: userMaps[i]['username'],
         password: "",
+      );
+    });
+  }
+
+  static Future<List<ServerUrl>> getServerUrl() async {
+    final db = await _database();
+    final List<Map<String, dynamic>> urlMaps = await db.query('tblServer');
+    return List.generate(urlMaps.length, (i) {
+      return ServerUrl(
+        serverUrl: urlMaps[i]['serverUrl'],
       );
     });
   }

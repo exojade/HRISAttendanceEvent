@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:diary_app/main.dart';
+import 'package:diary_app/models/serverUrl.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -21,6 +22,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _serverController = TextEditingController();
   bool _isLoading = false;
   bool _isConnected = true;
 
@@ -46,12 +48,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
     String username = _usernameController.text.trim();
     String password = _passwordController.text.trim();
+    String serverUrl = _serverController.text.trim();
 
     setState(() {
       _isLoading = true; // Set loading state to true
     });
 
-    bool isAuthenticated = await _authenticateUser(username, password);
+    bool isAuthenticated =
+        await _authenticateUser(username, password, serverUrl);
 
     setState(() {
       _isLoading = false; // Set loading state back to false
@@ -77,10 +81,13 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<bool> _authenticateUser(String username, String password) async {
+  Future<bool> _authenticateUser(
+      String username, String password, String serverUrl) async {
     try {
+      String theUrl = serverUrl + '/hris/mobileLogin';
+      print(theUrl);
       final response = await http.post(
-        Uri.parse('http://203.177.88.234:7000/hris/mobileLogin'),
+        Uri.parse(theUrl),
         body: jsonEncode({
           'employee': {'username': username, 'password': password},
         }),
@@ -103,6 +110,8 @@ class _LoginScreenState extends State<LoginScreen> {
             password: password, // This should be handled securely
             userId: userId,
           ));
+
+          await NoteRepository.inserServerUrl(ServerUrl(serverUrl: serverUrl));
 
           return true; // Authentication successful
         } else {
@@ -200,6 +209,10 @@ class _LoginScreenState extends State<LoginScreen> {
               controller: _passwordController,
               decoration: InputDecoration(labelText: 'Password'),
               obscureText: true,
+            ),
+            TextField(
+              controller: _serverController,
+              decoration: InputDecoration(labelText: 'Server URL'),
             ),
             SizedBox(height: 20.0),
             ElevatedButton(
