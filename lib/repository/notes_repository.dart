@@ -110,6 +110,7 @@ class NoteRepository {
   static Future<void> deleteUsers() async {
     final db = await _database();
     await db.delete('users');
+    await db.delete('tblServer');
   }
 
   static Future<void> deleteAllEmployees() async {

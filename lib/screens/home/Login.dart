@@ -22,7 +22,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _serverController = TextEditingController();
+  final TextEditingController _serverController =
+      TextEditingController(text: 'http://panabocityeternalgarden.online');
   bool _isLoading = false;
   bool _isConnected = true;
 
@@ -30,6 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     checkConnectivity();
+    NoteRepository.initDatabase();
   }
 
   Future<void> checkConnectivity() async {
@@ -179,45 +181,110 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildLoginForm() {
     return SingleChildScrollView(
-      // Wrap with SingleChildScrollView
       child: Padding(
-        padding: EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/images/login_image.png', // Replace with your image path
-              width: 150, // Adjust the width as needed
-              height: 150, // Adjust the height as needed
+              'assets/images/login_image.png',
+              width: 150,
+              height: 150,
             ),
-            SizedBox(height: 20.0),
-            Text(
-              'HR Attendance Monitoring for Events',
-              textAlign: TextAlign.center,
+            const SizedBox(height: 20.0),
+            const Text(
+              'HRIS Mobile Attendance',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 20.0),
+            const SizedBox(height: 20.0),
             TextField(
               controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
+              decoration: InputDecoration(
+                labelText: 'Username *',
+                labelStyle: const TextStyle(
+                    color: Colors.grey), // Grey color for label text
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(
+                      color: Colors.grey), // Default border color
+                  borderRadius:
+                      BorderRadius.circular(10.0), // Optional rounded corners
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(
+                      color: Color(0xFF22428E), width: 2.0), // Color on focus
+                  borderRadius:
+                      BorderRadius.circular(10.0), // Optional rounded corners
+                ),
+                border: OutlineInputBorder(
+                  borderRadius:
+                      BorderRadius.circular(10.0), // Optional rounded corners
+                ),
+              ),
             ),
-            SizedBox(height: 20.0),
+            const SizedBox(height: 20.0),
             TextField(
               controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
               obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'Password *',
+                labelStyle: const TextStyle(
+                    color: Colors.grey), // Grey color for label text
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(
+                      color: Colors.grey), // Default border color
+                  borderRadius:
+                      BorderRadius.circular(10.0), // Optional rounded corners
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(
+                      color: Color(0xFF22428E), width: 2.0), // Color on focus
+                  borderRadius:
+                      BorderRadius.circular(10.0), // Optional rounded corners
+                ),
+                border: OutlineInputBorder(
+                  borderRadius:
+                      BorderRadius.circular(10.0), // Optional rounded corners
+                ),
+              ),
             ),
+            const SizedBox(height: 20.0),
             TextField(
               controller: _serverController,
-              decoration: InputDecoration(labelText: 'Server URL'),
+              decoration: InputDecoration(
+                labelText: 'Server Url *',
+                labelStyle: const TextStyle(
+                    color: Colors.grey), // Grey color for label text
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(
+                      color: Colors.grey), // Default border color
+                  borderRadius:
+                      BorderRadius.circular(10.0), // Optional rounded corners
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(
+                      color: Color(0xFF22428E), width: 2.0), // Color on focus
+                  borderRadius:
+                      BorderRadius.circular(10.0), // Optional rounded corners
+                ),
+                border: OutlineInputBorder(
+                  borderRadius:
+                      BorderRadius.circular(10.0), // Optional rounded corners
+                ),
+              ),
             ),
-            SizedBox(height: 20.0),
+            const SizedBox(height: 20.0),
             ElevatedButton(
               onPressed: _login,
-              child: Text('Login'),
+              child: const Text('LOGIN'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF22428E),
+                foregroundColor: Colors.white, // Set the background color
+                minimumSize: const Size(double.infinity,
+                    50), // Stretch button to fill width and set height
+              ),
             ),
           ],
         ),

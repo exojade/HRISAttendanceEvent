@@ -164,6 +164,7 @@ class _MyAppState extends State<MyApp> {
           TextButton(
             onPressed: () async {
               await NoteRepository.deleteUsers();
+              await NoteRepository.initDatabase();
               _onLogoutSuccess();
               Navigator.pop(context);
             },
