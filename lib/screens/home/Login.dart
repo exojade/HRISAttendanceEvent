@@ -31,7 +31,11 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     checkConnectivity();
-    NoteRepository.initDatabase();
+    fetchServerDatatable();
+  }
+
+  Future<void> fetchServerDatatable() async {
+    await NoteRepository.addServerTable();
   }
 
   Future<void> checkConnectivity() async {

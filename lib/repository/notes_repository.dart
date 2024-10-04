@@ -81,6 +81,16 @@ class NoteRepository {
     }
   }
 
+  static Future<void> addServerTable() async {
+    try {
+      final db = await _database();
+      db.execute(
+          'CREATE TABLE IF NOT EXISTS $_tblServer(serverUrl TEXT PRIMARY KEY)');
+    } catch (e) {
+      // print('Error getting user count: $e');
+    }
+  }
+
   static Future<int> getUserCount() async {
     try {
       final db = await _database();

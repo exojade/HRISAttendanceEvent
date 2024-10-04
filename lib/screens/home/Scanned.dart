@@ -256,19 +256,19 @@ class _ScannedLogsScreenState extends State<ScannedLogsScreen> {
               children: [
                 Text('$_scanCount'), // Display scan log count
                 SizedBox(width: 5), // Add some spacing
-                if (_userId == "903") // Conditionally show the button
-                  IconButton(
-                    onPressed: () {
-                      // Navigate to the history page
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ScannedLogsHistoryPage(),
-                        ),
-                      );
-                    },
-                    icon: Icon(Icons.history),
-                  ),
+                // if (_userId == "903") // Conditionally show the button
+                IconButton(
+                  onPressed: () {
+                    // Navigate to the history page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ScannedLogsHistoryPage(),
+                      ),
+                    );
+                  },
+                  icon: Icon(Icons.history),
+                ),
                 IconButton(
                   onPressed:
                       _uploadScanLogs, // Call _uploadScanLogs when pressed
